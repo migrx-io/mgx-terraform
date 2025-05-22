@@ -1,0 +1,2 @@
+# mgx-terraform
+Setup scripts
