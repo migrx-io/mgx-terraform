@@ -57,6 +57,7 @@ resource "aws_iam_instance_profile" "ec2_profile" {
 }
 
 resource "aws_security_group" "bastion_sg" {
+  count       = var.bastion_enable ? 1 : 0
   name        = "storage-bastion-sg"
   description = "Bastion security group"
 
@@ -98,10 +99,11 @@ resource "aws_security_group" "allow_vpc_internal" {
 }
 
 resource "aws_instance" "bastion" {
+  count                       = var.bastion_enable ? 1 : 0
   ami                         = var.bastion_ami
   instance_type               = var.bastion_instance_type
   key_name                    = aws_key_pair.deployer.key_name
-  vpc_security_group_ids      = [aws_security_group.bastion_sg.id]
+  vpc_security_group_ids      = [aws_security_group.bastion_sg[0].id]
   subnet_id                   = var.bastion_vpc_subnet
   associate_public_ip_address = true
   root_block_device {
@@ -127,10 +129,10 @@ resource "aws_instance" "storage_node" {
     }
   ]...)
 
-  ami                    = each.value.pool_config.nodes_ami
-  instance_type          = each.value.pool_config.nodes_instance_type
-  key_name               = aws_key_pair.deployer.key_name
-  iam_instance_profile   = aws_iam_instance_profile.ec2_profile[each.value.pool_name].name
+  ami                  = each.value.pool_config.nodes_ami
+  instance_type        = each.value.pool_config.nodes_instance_type
+  key_name             = aws_key_pair.deployer.key_name
+  iam_instance_profile = aws_iam_instance_profile.ec2_profile[each.value.pool_name].name
 
   subnet_id              = each.value.subnet
   availability_zone      = each.value.az
@@ -147,13 +149,13 @@ resource "aws_s3_bucket" "s3storage" {
     for pair in flatten([
       for pool_name, pool in var.storage_pools : [
         for bucket_name in pool.s3_bucket_names : {
-          key         = "${pool_name}-${bucket_name}"
-          bucket_name = bucket_name
-          pool_name   = pool_name
+          key           = "${pool_name}-${bucket_name}"
+          bucket_name   = bucket_name
+          pool_name     = pool_name
           force_destroy = pool.s3_force_destroy
         }
       ]
-    ]) : pair.key => {
+      ]) : pair.key => {
       bucket_name   = pair.bucket_name
       pool_name     = pair.pool_name
       force_destroy = pair.force_destroy

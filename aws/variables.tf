@@ -21,6 +21,12 @@ variable "storage_pools" {
   }))
 }
 
+
+variable "bastion_enable" {
+  description = "Bastion enable"
+  type        = bool
+}
+
 variable "bastion_ami" {
   description = "Bastion AMI"
   type        = string
