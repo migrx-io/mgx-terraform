@@ -77,10 +77,14 @@ aws/
     ```
 
     ```
-    ssh -i ~/.ssh/id_rsa ubuntu@<bastion_public_ip>
+    eval "$(ssh-agent -s)"
+    ssh-add ~/.ssh/id_rsa
+
+
+    ssh ubuntu@<bastion_public_ip>
     ```
 
-5. SSH into storage nodes from bastion
+5. SSH into storage nodes from bastion (SSH Agent Forwarding)
 
     Get private IPs from outputs:
 
@@ -91,5 +95,5 @@ aws/
     Then SSH from bastion:
 
     ```
-    ssh -i ~/.ssh/id_rsa ubuntu@<storage_node_private_ip>
+    ssh -A ubuntu@<storage_node_private_ip>
     ```
