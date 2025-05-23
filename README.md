@@ -40,16 +40,18 @@ aws/
     Copy and customize terraform.tfvars:
 
     ```
-    bastion_ami              = "ami-0abcdef1234567890"
-    bastion_instance_type    = "t3.micro"
+    vpc_id                   = "vpc-xxxxxxxx"
+    vpc_subnets              = ["subnet-xxxx", "subnet-yyyy"]
+    azs                      = ["us-east-1a", "us-east-1b"]
+
     storage_nodes_ami        = "ami-0abcdef1234567890"
     storage_nodes_instance_type = "t3.small"
     storage_nodes_count      = 3
     storage_s3_bucket_name   = "my-storage-bucket"
     storage_s3_force_destroy = true
-    vpc_id                   = "vpc-xxxxxxxx"
-    vpc_subnets              = ["subnet-xxxx", "subnet-yyyy"]
-    azs                      = ["us-east-1a", "us-east-1b"]
+
+    bastion_ami              = "ami-0abcdef1234567890"
+    bastion_instance_type    = "t3.micro"
     bastion_whitelist_ips    = ["YOUR.IP.ADDRESS/32"]
     ```
 
