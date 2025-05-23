@@ -23,13 +23,20 @@ aws/
 ├── main.tf              # Core infrastructure definitions
 ├── provider.tf          # AWS provider setup
 ├── variables.tf         # Input variables
+├── terraform.tf         # Your custom variables
 ├── outputs.tf           # Output definitions
 
 ```
 
 ## 🚀 Usage
 
-1. Initialize Terraform
+1. Go to `aws` dir
+
+    ```
+    cd ./aws
+    ```
+
+2. Initialize Terraform
 
     ```
     terraform init
@@ -37,7 +44,7 @@ aws/
 
 2. Set variables
 
-    Copy and customize terraform.tfvars:
+    Copy and customize `terraform.tfvars`:
 
     ```
     vpc_id                   = "vpc-xxxxxxxx"
@@ -63,10 +70,11 @@ aws/
 
 4. Get bastion IP and SSH into bastion
 
-    Terraform will output the public IP of the Bastion host:
+    Get public IPs from outputs:
 
-    bastion_public_ip = "X.X.X.X"
-
+    ```
+    terraform output bastion_public_ip
+    ```
 
     ```
     ssh -i ~/.ssh/id_rsa ubuntu@<bastion_public_ip>
