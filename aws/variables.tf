@@ -8,49 +8,26 @@ variable "vpc_id" {
   type        = string
 }
 
-variable "azs" {
-  description = "Availability zones to use"
-  type        = list(string)
-}
-
-variable "vpc_subnets" {
-  description = "Subnets to use. Should match AZs"
-  type        = list(string)
-}
-
-variable "storage_pool_name" {
-  description = "Storage pool name"
-  type        = string
-}
-
-variable "storage_nodes_ami" {
-  description = "Storage nodes AMI"
-  type        = string
-}
-
-variable "storage_nodes_instance_type" {
-  description = "Storage nodes type"
-  type        = string
-}
-
-variable "storage_nodes_count" {
-  description = "Storage nodes count"
-  type        = number
-}
-
-variable "storage_s3_bucket_names" {
-  description = "S3 bucket names to store block data"
-  type        = list(string)
-}
-
-variable "storage_s3_force_destroy" {
-  description = "Whether to force destroy the S3 bucket (delete even if it contains objects)"
-  type        = bool
-  default     = false
+variable "storage_pools" {
+  description = "Map of storage pools"
+  type = map(object({
+    azs                 = list(string) # Availability zones to use
+    vpc_subnets         = list(string) # Subnets to use. Should match AZs
+    nodes_ami           = string       # Storage nodes AMI
+    nodes_instance_type = string       # Storage nodes type
+    nodes_count         = number       # Storage nodes count
+    s3_bucket_names     = list(string) # S3 bucket names to store block data
+    s3_force_destroy    = bool         # Whether to force destroy the S3 bucket (delete even if it contains objects)
+  }))
 }
 
 variable "bastion_ami" {
   description = "Bastion AMI"
+  type        = string
+}
+
+variable "bastion_vpc_subnet" {
+  description = "Bastion vpc subnet"
   type        = string
 }
 
