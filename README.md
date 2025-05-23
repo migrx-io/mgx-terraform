@@ -2,7 +2,7 @@
 
 This Terraform configuration sets up a secure and scalable infrastructure in AWS including:
 
-- A Bastion EC2 instance to access private nodes
+- A Bastion EC2 instance to access storage nodes
 - Storage EC2 instances with IAM roles to access an S3 bucket
 - Security groups for controlled access
 - An S3 bucket for storage
