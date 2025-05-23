@@ -31,15 +31,15 @@ aws/
 
 1. Initialize Terraform
 
-```
-terraform init
-```
+    ```
+    terraform init
+    ```
 
 2. Set variables
 
-Copy and customize terraform.tfvars:
+    Copy and customize terraform.tfvars:
 
-```
+    ```
     bastion_ami              = "ami-0abcdef1234567890"
     bastion_instance_type    = "t3.micro"
     storage_nodes_ami        = "ami-0abcdef1234567890"
@@ -51,36 +51,35 @@ Copy and customize terraform.tfvars:
     vpc_subnets              = ["subnet-xxxx", "subnet-yyyy"]
     azs                      = ["us-east-1a", "us-east-1b"]
     bastion_whitelist_ips    = ["YOUR.IP.ADDRESS/32"]
-```
+    ```
 
 3. Apply the configuration
 
-```
-terraform apply
-```
+    ```
+    terraform apply
+    ```
 
-4. Get bastion IP
+4. Get bastion IP and SSH into bastion
 
-Terraform will output the public IP of the Bastion host:
+    Terraform will output the public IP of the Bastion host:
 
-bastion_public_ip = "X.X.X.X"
+    bastion_public_ip = "X.X.X.X"
 
-5. SSH into bastion
 
-```
-ssh -i ~/.ssh/id_rsa ubuntu@<bastion_public_ip>
-```
+    ```
+    ssh -i ~/.ssh/id_rsa ubuntu@<bastion_public_ip>
+    ```
 
-6. SSH into storage nodes from bastion
+5. SSH into storage nodes from bastion
 
-Get private IPs from outputs:
+    Get private IPs from outputs:
 
-```
-terraform output storage_node_private_ips
-```
+    ```
+    terraform output storage_node_private_ips
+    ```
 
-Then SSH from bastion:
+    Then SSH from bastion:
 
-```
-ssh -i ~/.ssh/id_rsa ubuntu@<storage_node_private_ip>
-```
+    ```
+    ssh -i ~/.ssh/id_rsa ubuntu@<storage_node_private_ip>
+    ```
