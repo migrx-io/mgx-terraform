@@ -5,7 +5,7 @@ resource "aws_key_pair" "deployer" {
 }
 
 resource "aws_iam_role" "storage_s3_full_access" {
-  name = "storage-${var.storage_s3_bucket_name}-full-access-role"
+  name = "storage-${var.storage_pool_name}-full-access-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -22,7 +22,7 @@ resource "aws_iam_role" "storage_s3_full_access" {
 }
 
 resource "aws_iam_role_policy" "s3_bucket_only" {
-  name = "bucket-${var.storage_s3_bucket_name}-access-policy"
+  name = "bucket-${var.storage_pool_name}-access-policy"
   role = aws_iam_role.storage_s3_full_access.id
 
   policy = jsonencode({
@@ -36,17 +36,18 @@ resource "aws_iam_role_policy" "s3_bucket_only" {
           "s3:DeleteObject",
           "s3:ListBucket"
         ]
-        Resource = [
-          "arn:aws:s3:::${var.storage_s3_bucket_name}",
-          "arn:aws:s3:::${var.storage_s3_bucket_name}/*"
-        ]
+        Resource = concat(
+          [for name in var.storage_s3_bucket_names : "arn:aws:s3:::${name}"],
+          [for name in var.storage_s3_bucket_names : "arn:aws:s3:::${name}/*"]
+        )
+
       }
     ]
   })
 }
 
 resource "aws_iam_instance_profile" "ec2_profile" {
-  name = "ec2-s3-${var.storage_s3_bucket_name}-instance-profile"
+  name = "ec2-s3-${var.storage_pool_name}-instance-profile"
   role = aws_iam_role.storage_s3_full_access.name
 }
 
@@ -121,13 +122,14 @@ resource "aws_instance" "storage_node" {
   subnet_id              = element(var.vpc_subnets, count.index % length(var.vpc_subnets))
 
   tags = {
-    Name = "storage-node-${var.storage_s3_bucket_name}-${count.index}"
+    Name = "storage-node-${var.storage_pool_name}-${count.index}"
     Service = "mgx-storage"
   }
 }
 
 resource "aws_s3_bucket" "s3storage" {
-  bucket        = var.storage_s3_bucket_name
+  for_each      = toset(var.storage_s3_bucket_names)
+  bucket        = each.key
   force_destroy = var.storage_s3_force_destroy
 
   tags = {

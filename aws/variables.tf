@@ -18,6 +18,11 @@ variable "vpc_subnets" {
   type        = list(string)
 }
 
+variable "storage_pool_name" {
+  description = "Storage pool name"
+  type        = string
+}
+
 variable "storage_nodes_ami" {
   description = "Storage nodes AMI"
   type        = string
@@ -33,9 +38,9 @@ variable "storage_nodes_count" {
   type        = number
 }
 
-variable "storage_s3_bucket_name" {
-  description = "S3 bucket name to store block data"
-  type        = string
+variable "storage_s3_bucket_names" {
+  description = "S3 bucket names to store block data"
+  type        = list(string)
 }
 
 variable "storage_s3_force_destroy" {
