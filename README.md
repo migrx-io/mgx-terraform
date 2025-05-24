@@ -44,9 +44,9 @@ aws/
 
 3. Set your variables
 
-        Bastion resources are only created when bastion_enable = true.
-        You can define multiple storage_pools with independent configuration.
-        All storage instances are granted S3 access via IAM roles.
+    *Bastion resources are only created when bastion_enable = true.*
+    *You can define multiple storage_pools with independent configuration.*
+    *All storage instances are granted S3 access via IAM roles.*
 
     Edit or create a `.tfvars` file inside `envs/`. Example: `envs/us-east-1.tfvars`
 
