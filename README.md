@@ -2,10 +2,10 @@
 
 This Terraform configuration sets up a secure and scalable infrastructure in AWS including:
 
-- A Bastion EC2 instance to access storage nodes
-- Storage EC2 instances with IAM roles to access an S3 bucket
+- (Optional) Bastion EC2 instance for SSH access
+- Storage EC2 instances across availability zones with IAM roles for S3 access
 - Security groups for controlled access
-- An S3 bucket for storage
+- S3 buckets for object storage (1+ per pool)
 - SSH access with a shared key pair
 
 ## 🔧 Prerequisites
@@ -17,14 +17,14 @@ This Terraform configuration sets up a secure and scalable infrastructure in AWS
 ## 📁 File Structure
 
 
-
 ```bash
 aws/
 ├── main.tf              # Core infrastructure definitions
 ├── provider.tf          # AWS provider setup
 ├── variables.tf         # Input variables
-├── terraform.tf         # Your custom variables
-├── outputs.tf           # Output definitions
+├── outputs.tf           # Output values
+├── envs/
+│   └── us-east-1.tfvars # Example environment variables
 
 ```
 
@@ -42,33 +42,49 @@ aws/
     terraform init
     ```
 
-2. Set variables
+3. Set your variables
 
-    Copy and customize `terraform.tfvars`:
+        Bastion resources are only created when bastion_enable = true.
+        You can define multiple storage_pools with independent configuration.
+        All storage instances are granted S3 access via IAM roles.
 
-    ```
-    vpc_id                   = "vpc-xxxxxxxx"
-    vpc_subnets              = ["subnet-xxxx", "subnet-yyyy"]
-    azs                      = ["us-east-1a", "us-east-1b"]
-
-    storage_nodes_ami        = "ami-0abcdef1234567890"
-    storage_nodes_instance_type = "t3.small"
-    storage_nodes_count      = 3
-    storage_s3_bucket_name   = "my-storage-bucket"
-    storage_s3_force_destroy = true
-
-    bastion_ami              = "ami-0abcdef1234567890"
-    bastion_instance_type    = "t3.micro"
-    bastion_whitelist_ips    = ["YOUR.IP.ADDRESS/32"]
-    ```
-
-3. Apply the configuration
+    Edit or create a `.tfvars` file inside `envs/`. Example: `envs/us-east-1.tfvars`
 
     ```
-    terraform apply
+    region  = "us-east-1"
+    vpc_id  = "vpc-xxxxxxxx"
+
+    bastion_enable        = true
+    bastion_ami           = "ami-0abcdef1234567890"
+    bastion_instance_type = "t3.micro"
+    bastion_vpc_subnet    = "subnet-xxxxxxxx"
+    bastion_whitelist_ips = ["YOUR.IP.ADDRESS/32"]
+
+    storage_pools = {
+        pool1 = {
+            azs = ["us-east-1a", "us-east-1b", "us-east-1c"]
+            vpc_subnets = [
+                "subnet-aaaa", # us-east-1a
+                "subnet-bbbb", # us-east-1b
+                "subnet-cccc"  # us-east-1c
+            ]
+            nodes_ami           = "ami-0abcdef1234567890"
+            nodes_instance_type = "t3.large"
+            nodes_count         = 2
+            s3_bucket_names     = ["pool1-bucket"]
+            s3_force_destroy    = true
+        }
+    }
+
     ```
 
-4. Get bastion IP and SSH into bastion
+4. Apply the configuration
+
+    ```
+    terraform apply -var-file=./envs/us-east-1.tfvars
+    ```
+
+5. Get bastion IP and SSH into bastion
 
     Get public IPs from outputs:
 
@@ -84,7 +100,7 @@ aws/
     ssh ubuntu@<bastion_public_ip>
     ```
 
-5. SSH into storage nodes from bastion (SSH Agent Forwarding)
+6. SSH into storage nodes from bastion (SSH Agent Forwarding)
 
     Get private IPs from outputs:
 
