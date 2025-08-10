@@ -4,6 +4,45 @@ resource "aws_key_pair" "deployer" {
   public_key = file("~/.ssh/id_rsa.pub")
 }
 
+resource "aws_subnet" "mgmt" {
+  count             = length(var.azs)
+  vpc_id            = var.vpc_id
+  cidr_block        = var.mgmt_subnet_cidrs[count.index]
+  availability_zone = var.azs[count.index]
+
+  tags = {
+    Name = "mgmt-subnet-${var.azs[count.index]}"
+  }
+}
+
+resource "aws_subnet" "storage" {
+  count             = length(var.azs)
+  vpc_id            = var.vpc_id
+  cidr_block        = var.storage_subnet_cidrs[count.index]
+  availability_zone = var.azs[count.index]
+
+  tags = {
+    Name = "storage-subnet-${var.azs[count.index]}"
+  }
+}
+
+resource "aws_network_interface" "storage_secondary" {
+  for_each = merge([
+    for pool_name, pool in var.storage_pools : {
+      for idx in range(pool.nodes_count) : "${pool_name}-${idx}" => {
+        az_index  = idx % length(var.azs)
+        pool_name = pool_name
+        index     = idx
+      }
+    }
+  ]...)
+  
+  subnet_id       = aws_subnet.storage[each.value.az_index].id
+  private_ips     = [cidrhost(var.storage_subnet_cidrs[each.value.az_index], each.value.index + 10)]
+  security_groups = [aws_security_group.allow_vpc_internal.id]
+}
+
+
 resource "aws_iam_role" "storage_s3_full_access" {
   for_each = var.storage_pools
 
@@ -115,24 +154,24 @@ resource "aws_instance" "bastion" {
   }
 }
 
+
 resource "aws_instance" "mgmt_node" {
   for_each = {
-    for index in range(var.mgmt_pool.nodes_count) :
-    index => {
-      az     = var.mgmt_pool.azs[index % length(var.mgmt_pool.azs)]
-      subnet = var.mgmt_pool.vpc_subnets[index % length(var.mgmt_pool.vpc_subnets)]
+    for idx in range(var.mgmt_pool.nodes_count) : "mgmt-${idx}" => {
+      az_index = idx % length(var.azs)
+      index = idx
     }
   }
 
-  ami                  = var.mgmt_pool.nodes_ami
-  instance_type        = var.mgmt_pool.nodes_instance_type
-  key_name             = aws_key_pair.deployer.key_name
-  subnet_id            = each.value.subnet
-  availability_zone    = each.value.az
+  ami           = var.mgmt_pool.nodes_ami
+  instance_type = var.mgmt_pool.nodes_instance_type
+  key_name      = aws_key_pair.deployer.key_name
+  availability_zone = var.azs[each.value.az_index]
+  subnet_id        = aws_subnet.mgmt[each.value.az_index].id
   vpc_security_group_ids = [aws_security_group.allow_vpc_internal.id]
 
   tags = {
-    Name    = "mgmt-node-${each.key}"
+    Name    = "mgmt-node-${each.value.index}"
     Service = "mgx-mgmt"
   }
 }
@@ -140,31 +179,37 @@ resource "aws_instance" "mgmt_node" {
 resource "aws_instance" "storage_node" {
   for_each = merge([
     for pool_name, pool in var.storage_pools : {
-      for index in range(pool.nodes_count) :
-      "${pool_name}-${index}" => {
+      for idx in range(pool.nodes_count) : "${pool_name}-${idx}" => {
+        az_index    = idx % length(var.azs)
         pool_name   = pool_name
         pool_config = pool
-        index       = index
-        az          = pool.azs[index % length(pool.azs)]
-        subnet      = pool.vpc_subnets[index % length(pool.vpc_subnets)]
+        index       = idx
       }
     }
   ]...)
 
-  ami                  = each.value.pool_config.nodes_ami
-  instance_type        = each.value.pool_config.nodes_instance_type
-  key_name             = aws_key_pair.deployer.key_name
+  ami           = each.value.pool_config.nodes_ami
+  instance_type = each.value.pool_config.nodes_instance_type
+  key_name      = aws_key_pair.deployer.key_name
   iam_instance_profile = aws_iam_instance_profile.ec2_profile[each.value.pool_name].name
+  availability_zone    = var.azs[each.value.az_index]
 
-  subnet_id              = each.value.subnet
-  availability_zone      = each.value.az
+  # Primary network interface settings here (top-level)
+  subnet_id              = aws_subnet.mgmt[each.value.az_index].id
   vpc_security_group_ids = [aws_security_group.allow_vpc_internal.id]
+
+  # Secondary network interface must reference ENI ID only
+  network_interface {
+    device_index         = 1
+    network_interface_id = aws_network_interface.storage_secondary[each.key].id
+  }
 
   tags = {
     Name    = "storage-node-${each.value.pool_name}-${each.value.index}"
     Service = "mgx-storage"
   }
 }
+
 
 resource "aws_s3_bucket" "s3storage" {
   for_each = {

@@ -8,6 +8,21 @@ variable "vpc_id" {
   type        = string
 }
 
+variable "azs" {
+  description = "List of availability zones"
+  type        = list(string)
+}
+
+variable "mgmt_subnet_cidrs" {
+  description = "CIDRs for management subnets (one per AZ)"
+  type        = list(string)
+}
+
+variable "storage_subnet_cidrs" {
+  description = "CIDRs for storage subnets (one per AZ)"
+  type        = list(string)
+}
+
 variable "bastion" {
   description = "Bastion parameters"
   type = object({
@@ -22,8 +37,6 @@ variable "bastion" {
 variable "mgmt_pool" {
   description = "Management node pool parameters"
   type = object({
-    azs                 = list(string) # Availability zones to use
-    vpc_subnets         = list(string) # Subnets to use
     nodes_ami           = string       # AMI for mgmt nodes
     nodes_instance_type = string       # EC2 instance type
     nodes_count         = number       # Number of mgmt nodes
@@ -33,8 +46,6 @@ variable "mgmt_pool" {
 variable "storage_pools" {
   description = "Map of storage pools parameters"
   type = map(object({
-    azs                 = list(string) # Availability zones to use
-    vpc_subnets         = list(string) # Subnets to use. Should match AZs
     nodes_ami           = string       # Storage nodes AMI
     nodes_instance_type = string       # Storage nodes type
     nodes_count         = number       # Storage nodes count
@@ -42,4 +53,3 @@ variable "storage_pools" {
     s3_force_destroy    = bool         # Whether to force destroy the S3 bucket (delete even if it contains objects)
   }))
 }
-
