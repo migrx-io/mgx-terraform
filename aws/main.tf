@@ -57,7 +57,7 @@ resource "aws_iam_instance_profile" "ec2_profile" {
 }
 
 resource "aws_security_group" "bastion_sg" {
-  count       = var.bastion_enable ? 1 : 0
+  count       = var.bastion.enable ? 1 : 0
   name        = "storage-bastion-sg"
   description = "Bastion security group"
 
@@ -66,7 +66,7 @@ resource "aws_security_group" "bastion_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = var.bastion_whitelist_ips
+    cidr_blocks = var.bastion.whitelist_ips
   }
   egress {
     from_port   = 0
@@ -99,12 +99,12 @@ resource "aws_security_group" "allow_vpc_internal" {
 }
 
 resource "aws_instance" "bastion" {
-  count                       = var.bastion_enable ? 1 : 0
-  ami                         = var.bastion_ami
-  instance_type               = var.bastion_instance_type
+  count                       = var.bastion.enable ? 1 : 0
+  ami                         = var.bastion.ami
+  instance_type               = var.bastion.instance_type
   key_name                    = aws_key_pair.deployer.key_name
   vpc_security_group_ids      = [aws_security_group.bastion_sg[0].id]
-  subnet_id                   = var.bastion_vpc_subnet
+  subnet_id                   = var.bastion.vpc_subnet
   associate_public_ip_address = true
   root_block_device {
     volume_size = 15
@@ -112,6 +112,28 @@ resource "aws_instance" "bastion" {
   tags = {
     Name    = "storage-bastion"
     Service = "mgx-storage"
+  }
+}
+
+resource "aws_instance" "mgmt_node" {
+  for_each = {
+    for index in range(var.mgmt_pool.nodes_count) :
+    index => {
+      az     = var.mgmt_pool.azs[index % length(var.mgmt_pool.azs)]
+      subnet = var.mgmt_pool.vpc_subnets[index % length(var.mgmt_pool.vpc_subnets)]
+    }
+  }
+
+  ami                  = var.mgmt_pool.nodes_ami
+  instance_type        = var.mgmt_pool.nodes_instance_type
+  key_name             = aws_key_pair.deployer.key_name
+  subnet_id            = each.value.subnet
+  availability_zone    = each.value.az
+  vpc_security_group_ids = [aws_security_group.allow_vpc_internal.id]
+
+  tags = {
+    Name    = "mgmt-node-${each.key}"
+    Service = "mgx-mgmt"
   }
 }
 
@@ -170,5 +192,3 @@ resource "aws_s3_bucket" "s3storage" {
     Pool    = each.value.pool_name
   }
 }
-
-

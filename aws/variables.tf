@@ -8,8 +8,30 @@ variable "vpc_id" {
   type        = string
 }
 
+variable "bastion" {
+  description = "Bastion parameters"
+  type = object({
+    enable        = bool
+    vpc_subnet    = string
+    ami           = string
+    instance_type = string 
+    whitelist_ips = list(string)
+  })
+}
+
+variable "mgmt_pool" {
+  description = "Management node pool parameters"
+  type = object({
+    azs                 = list(string) # Availability zones to use
+    vpc_subnets         = list(string) # Subnets to use
+    nodes_ami           = string       # AMI for mgmt nodes
+    nodes_instance_type = string       # EC2 instance type
+    nodes_count         = number       # Number of mgmt nodes
+  })
+}
+
 variable "storage_pools" {
-  description = "Map of storage pools"
+  description = "Map of storage pools parameters"
   type = map(object({
     azs                 = list(string) # Availability zones to use
     vpc_subnets         = list(string) # Subnets to use. Should match AZs
@@ -21,28 +43,3 @@ variable "storage_pools" {
   }))
 }
 
-
-variable "bastion_enable" {
-  description = "Bastion enable"
-  type        = bool
-}
-
-variable "bastion_ami" {
-  description = "Bastion AMI"
-  type        = string
-}
-
-variable "bastion_vpc_subnet" {
-  description = "Bastion vpc subnet"
-  type        = string
-}
-
-variable "bastion_instance_type" {
-  description = "Bastion instance type"
-  type        = string
-}
-
-variable "bastion_whitelist_ips" {
-  description = "Basion whitelist ips"
-  type        = list(string)
-}
