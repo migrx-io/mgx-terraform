@@ -4,6 +4,14 @@ output "bastion_public_ip" {
 }
 
 
+output "mgmt_node_private_ips" {
+  description = "Private IPs of the management nodes"
+  value = [
+    for instance in aws_instance.mgmt_node :
+    instance.private_ip
+  ]
+}
+
 output "storage_node_private_ips" {
   description = "Private IPs of the storage nodes grouped by pool"
   value = {
