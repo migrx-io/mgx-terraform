@@ -1,6 +1,6 @@
 locals {
 
-  reserved_ip_count = 1
+  reserved_ip_count = 10
 
   mgmt_nodes_per_az = {
     for az_index in range(length(var.azs)) :
@@ -23,10 +23,12 @@ locals {
 
   sorted_pool_names = sort(keys(var.storage_pools))
 
+  # assign each pool a fixed offset (gap * pool index)
   pool_reserved_ip_offsets = {
     for idx, pool_name in local.sorted_pool_names :
     pool_name => idx * local.reserved_ip_count
   }
+
 
   all_storage_nodes = flatten([
     for pool_name, pool in var.storage_pools : [
@@ -52,14 +54,21 @@ locals {
     }
   }
 
+  # per-AZ offsets for storage mgmt interface
   storage_node_ip_offsets_shifted = {
-    for az, nodes in local.storage_nodes_by_az :
-    az => {
-      for idx, node in nodes :
-      "${node.pool_name}-${node.index_in_pool}" =>
-      local.pool_reserved_ip_offsets[node.pool_name] + idx
-    }
+    for az in range(length(var.azs)) :
+    az => merge([
+      for pool_name, pool in var.storage_pools : {
+        for idx in range(pool.nodes_count) :
+        "${pool_name}-${idx}" =>
+          local.pool_reserved_ip_offsets[pool_name] +
+          floor(idx / length(var.azs))
+          if idx % length(var.azs) == az
+      }
+    ]...)
   }
+
+
 }
 
 resource "aws_key_pair" "deployer" {
@@ -91,7 +100,7 @@ resource "aws_subnet" "storage" {
   }
 }
 
-# mgmt_primary unchanged (no reserved_ip offset here)
+
 resource "aws_network_interface" "mgmt_primary" {
   for_each = {
     for idx in range(var.mgmt_pool.nodes_count) : "mgmt-${idx}" => {
@@ -100,22 +109,23 @@ resource "aws_network_interface" "mgmt_primary" {
     }
   }
 
-  subnet_id       = aws_subnet.mgmt[each.value.az_index].id
+  subnet_id = aws_subnet.mgmt[each.value.az_index].id
 
   private_ips = [
     cidrhost(
       var.mgmt_subnet_cidrs[each.value.az_index],
-      10 + floor(each.value.index / length(var.azs))
+      local.reserved_ip_count + floor(each.value.index / length(var.azs))
     )
   ]
 
   security_groups = [aws_security_group.allow_vpc_internal.id]
 
   tags = {
-    Name = "mgmt-${each.value.index}"
+    Name    = "mgmt-${each.value.index}"
     Service = "mgx-storage"
   }
 }
+
 
 resource "aws_network_interface" "storage_primary" {
   for_each = merge([
@@ -135,18 +145,18 @@ resource "aws_network_interface" "storage_primary" {
     cidrhost(
       var.mgmt_subnet_cidrs[each.value.az_index],
       local.storage_mgmt_start_offset_per_az[each.value.az_index] +
-        lookup(local.storage_node_ip_offsets_shifted[each.value.az_index], each.key)
+      lookup(local.storage_node_ip_offsets_shifted[each.value.az_index], each.key)
     )
   ]
-
 
   security_groups = [aws_security_group.allow_vpc_internal.id]
 
   tags = {
-    Name = "storage-mgmt-${each.value.pool_name}-${each.value.index}"
+    Name    = "storage-mgmt-${each.value.pool_name}-${each.value.index}"
     Service = "mgx-storage"
   }
 }
+
 
 resource "aws_network_interface" "storage_secondary" {
   for_each = merge([
@@ -164,7 +174,8 @@ resource "aws_network_interface" "storage_secondary" {
   private_ips = [
     cidrhost(
       var.storage_subnet_cidrs[each.value.az_index],
-      10 + lookup(local.storage_node_ip_offsets_shifted[each.value.az_index], each.key)
+      local.reserved_ip_count +
+      lookup(local.storage_node_ip_offsets_shifted[each.value.az_index], each.key)
     )
   ]
 
@@ -175,6 +186,7 @@ resource "aws_network_interface" "storage_secondary" {
     Service = "mgx-storage"
   }
 }
+
 
 resource "aws_iam_role" "storage_s3_full_access" {
   for_each = var.storage_pools

@@ -64,4 +64,5 @@ variable "storage_pools" {
     s3_bucket_names     = list(string) # S3 bucket names to store block data
     s3_force_destroy    = bool         # Whether to force destroy the S3 bucket (delete even if it contains objects)
   }))
+
 }
