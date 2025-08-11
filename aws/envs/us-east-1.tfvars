@@ -7,15 +7,15 @@ azs = ["us-east-1a",
        "us-east-1c"]
 
 mgmt_subnet_cidrs = [
-  "10.0.10.0/24",  # us-east-1a primary
-  "10.0.11.0/24",  # us-east-1b primary
-  "10.0.12.0/24"   # us-east-1c primary
+  "172.31.96.0/24",  # us-east-1a primary
+  "172.31.97.0/24",  # us-east-1b primary
+  "172.31.98.0/24"   # us-east-1c primary
 ]
 
 storage_subnet_cidrs = [
-  "10.0.20.0/24",  # us-east-1a secondary
-  "10.0.21.0/24",  # us-east-1b secondary
-  "10.0.22.0/24"   # us-east-1c secondary
+  "172.31.99.0/24",  # us-east-1a secondary
+  "172.31.100.0/24",  # us-east-1b secondary
+  "172.31.101.0/24"   # us-east-1c secondary
 ]
 
 bastion = {
@@ -36,7 +36,7 @@ storage_pools = {
   pool1 = {
     nodes_ami           = "ami-0f9de6e2d2f067fca"
     nodes_instance_type = "c5ad.2xlarge"
-    nodes_count         = 1
+    nodes_count         = 3
     s3_bucket_names     = ["mgxs3storage1"]
     s3_force_destroy    = true
   }

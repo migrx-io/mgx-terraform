@@ -58,8 +58,8 @@ resource "aws_network_interface" "storage_primary" {
     }
   ]...)
 
-  subnet_id       = aws_subnet.mgmt[each.value.az_index].id
   # Continue IP allocation after mgmt nodes
+  subnet_id       = aws_subnet.mgmt[each.value.az_index].id
   private_ips     = [cidrhost(var.mgmt_subnet_cidrs[each.value.az_index], each.value.index + var.mgmt_pool.nodes_count + 10)]
   security_groups = [aws_security_group.allow_vpc_internal.id]
 
@@ -244,10 +244,6 @@ resource "aws_instance" "storage_node" {
   key_name      = aws_key_pair.deployer.key_name
   iam_instance_profile = aws_iam_instance_profile.ec2_profile[each.value.pool_name].name
   availability_zone    = var.azs[each.value.az_index]
-
-  # Primary network interface settings here (top-level)
-  subnet_id              = aws_subnet.mgmt[each.value.az_index].id
-  vpc_security_group_ids = [aws_security_group.allow_vpc_internal.id]
 
   # Primary mgmt ENI
   network_interface {
