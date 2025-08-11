@@ -29,7 +29,7 @@ bastion = {
 mgmt_pool = {
     nodes_ami           = "ami-0f9de6e2d2f067fca"
     nodes_instance_type = "t3a.xlarge"
-    nodes_count         = 3
+    nodes_count         = 5
 }
 
 storage_pools = {
@@ -43,9 +43,18 @@ storage_pools = {
   pool2 = {
     nodes_ami           = "ami-0f9de6e2d2f067fca"
     nodes_instance_type = "c5ad.2xlarge"
-    nodes_count         = 0
+    nodes_count         = 5
     s3_bucket_names     = []
     s3_force_destroy    = true
   }
+  pool3 = {
+    nodes_ami           = "ami-0f9de6e2d2f067fca"
+    nodes_instance_type = "c5ad.2xlarge"
+    nodes_count         = 3
+    s3_bucket_names     = []
+    s3_force_destroy    = true
+  }
+
+
 
 }

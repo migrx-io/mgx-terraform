@@ -1,3 +1,45 @@
+locals {
+  # Calculate number of mgmt nodes per AZ
+  mgmt_nodes_per_az = {
+    for az_index in range(length(var.azs)) :
+    az_index => length([
+      for idx in range(var.mgmt_pool.nodes_count) : idx if idx % length(var.azs) == az_index
+    ])
+  }
+
+  # Calculate starting offset per AZ for storage mgmt IPs
+  storage_mgmt_start_offset_per_az = {
+    for az_index, count in local.mgmt_nodes_per_az :
+    az_index => 10 + count
+  }
+
+  # Flatten all storage nodes with az_index and pool_name, index_in_pool
+  all_storage_nodes = flatten([
+    for pool_name, pool in var.storage_pools : [
+      for idx in range(pool.nodes_count) : {
+        pool_name      = pool_name
+        az_index       = idx % length(var.azs)
+        index_in_pool  = idx
+      }
+    ]
+  ])
+
+  # Group storage nodes by AZ
+  storage_nodes_by_az = {
+    for az in range(length(var.azs)) : az => [
+      for node in local.all_storage_nodes : node if node.az_index == az
+    ]
+  }
+
+  # Map node keys to their position (offset) within each AZ group
+  storage_node_ip_offsets = {
+    for az, nodes in local.storage_nodes_by_az :
+    az => {
+      for idx, node in nodes :
+      "${node.pool_name}-${node.index_in_pool}" => idx
+    }
+  }
+}
 
 resource "aws_key_pair" "deployer" {
   key_name   = "deployer-key"
@@ -37,7 +79,14 @@ resource "aws_network_interface" "mgmt_primary" {
   }
 
   subnet_id       = aws_subnet.mgmt[each.value.az_index].id
-  private_ips     = [cidrhost(var.mgmt_subnet_cidrs[each.value.az_index], each.value.index + 10)]
+
+  private_ips = [
+    cidrhost(
+      var.mgmt_subnet_cidrs[each.value.az_index],
+      10 + floor(each.value.index / length(var.azs))
+    )
+  ]
+
   security_groups = [aws_security_group.allow_vpc_internal.id]
 
   tags = {
@@ -58,9 +107,16 @@ resource "aws_network_interface" "storage_primary" {
     }
   ]...)
 
-  # Continue IP allocation after mgmt nodes
   subnet_id       = aws_subnet.mgmt[each.value.az_index].id
-  private_ips     = [cidrhost(var.mgmt_subnet_cidrs[each.value.az_index], each.value.index + floor(var.mgmt_pool.nodes_count / length(var.azs)) + 10)]
+
+  private_ips = [
+    cidrhost(
+      var.mgmt_subnet_cidrs[each.value.az_index],
+      local.storage_mgmt_start_offset_per_az[each.value.az_index] +
+        lookup(local.storage_node_ip_offsets[each.value.az_index], each.key)
+    )
+  ]
+
   security_groups = [aws_security_group.allow_vpc_internal.id]
 
   tags = {
@@ -79,17 +135,24 @@ resource "aws_network_interface" "storage_secondary" {
       }
     }
   ]...)
-  
-  subnet_id       = aws_subnet.storage[each.value.az_index].id
-  private_ips     = [cidrhost(var.storage_subnet_cidrs[each.value.az_index], each.value.index + 10)]
+
+  subnet_id = aws_subnet.storage[each.value.az_index].id
+
+  private_ips = [
+    cidrhost(
+      var.storage_subnet_cidrs[each.value.az_index],
+      10 + lookup(local.storage_node_ip_offsets[each.value.az_index], each.key)
+    )
+  ]
+
   security_groups = [aws_security_group.allow_vpc_internal.id]
 
   tags = {
-    Name = "storage-data-${each.value.pool_name}-${each.value.index}"
+    Name    = "storage-data-${each.value.pool_name}-${each.value.index}"
     Service = "mgx-storage"
   }
-
 }
+
 
 resource "aws_iam_role" "storage_s3_full_access" {
   for_each = var.storage_pools
