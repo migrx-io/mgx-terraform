@@ -44,7 +44,7 @@ storage_pools = {
     nodes_ami           = "ami-0f9de6e2d2f067fca"
     nodes_instance_type = "c5ad.2xlarge"
     nodes_count         = 0
-    s3_bucket_names     = ["mgxs3storage2"]
+    s3_bucket_names     = []
     s3_force_destroy    = true
   }
 
