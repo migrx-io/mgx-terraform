@@ -12,13 +12,25 @@ output "mgmt_node_private_ips" {
   ]
 }
 
-output "storage_node_private_ips" {
-  description = "Private IPs of the storage nodes grouped by pool"
+output "storage_node_mgmt_private_ips" {
+  description = "Management IPs of the storage nodes"
   value = {
     for pool_name in keys(var.storage_pools) :
     pool_name => [
-      for instance_key, instance in aws_instance.storage_node :
-      instance.private_ip if startswith(instance_key, "${pool_name}-")
+      for idx in range(var.storage_pools[pool_name].nodes_count) :
+        tolist(aws_network_interface.storage_primary["${pool_name}-${idx}"].private_ips)[0]
     ]
   }
 }
+
+output "storage_node_data_private_ips" {
+  description = "Data IPs of the storage nodes"
+  value = {
+    for pool_name in keys(var.storage_pools) :
+    pool_name => [
+      for idx in range(var.storage_pools[pool_name].nodes_count) : 
+        tolist(aws_network_interface.storage_secondary["${pool_name}-${idx}"].private_ips)[0]
+    ]
+  }
+}
+
