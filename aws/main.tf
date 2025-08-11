@@ -1,7 +1,7 @@
 
 resource "aws_key_pair" "deployer" {
   key_name   = "deployer-key"
-  public_key = file("~/.ssh/id_rsa.pub")
+  public_key = file(var.ssh_private_key_path)
 }
 
 resource "aws_subnet" "mgmt" {
@@ -60,7 +60,7 @@ resource "aws_network_interface" "storage_primary" {
 
   # Continue IP allocation after mgmt nodes
   subnet_id       = aws_subnet.mgmt[each.value.az_index].id
-  private_ips     = [cidrhost(var.mgmt_subnet_cidrs[each.value.az_index], each.value.index + var.mgmt_pool.nodes_count + 10)]
+  private_ips     = [cidrhost(var.mgmt_subnet_cidrs[each.value.az_index], each.value.index + floor(var.mgmt_pool.nodes_count / length(var.azs)) + 10)]
   security_groups = [aws_security_group.allow_vpc_internal.id]
 
   tags = {

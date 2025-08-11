@@ -34,6 +34,18 @@ variable "bastion" {
   })
 }
 
+variable "ssh_user" {
+  description = "SSH username for EC2 instances"
+  type        = string
+  default     = "ubuntu" # or ec2-user for Amazon Linux
+}
+
+variable "ssh_private_key_path" {
+  description = "Path to SSH private key used for EC2 access"
+  type        = string
+  default     = "~/.ssh/id_rsa"
+}
+
 variable "mgmt_pool" {
   description = "Management node pool parameters"
   type = object({
