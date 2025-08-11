@@ -12,6 +12,7 @@ resource "aws_subnet" "mgmt" {
 
   tags = {
     Name = "mgmt-subnet-${var.azs[count.index]}"
+    Service = "mgx-storage"
   }
 }
 
@@ -23,6 +24,48 @@ resource "aws_subnet" "storage" {
 
   tags = {
     Name = "storage-subnet-${var.azs[count.index]}"
+    Service = "mgx-storage"
+  }
+}
+
+resource "aws_network_interface" "mgmt_primary" {
+  for_each = {
+    for idx in range(var.mgmt_pool.nodes_count) : "mgmt-${idx}" => {
+      az_index = idx % length(var.azs)
+      index    = idx
+    }
+  }
+
+  subnet_id       = aws_subnet.mgmt[each.value.az_index].id
+  private_ips     = [cidrhost(var.mgmt_subnet_cidrs[each.value.az_index], each.value.index + 10)]
+  security_groups = [aws_security_group.allow_vpc_internal.id]
+
+  tags = {
+    Name = "mgmt-${each.value.index}"
+    Service = "mgx-storage"
+  }
+}
+
+resource "aws_network_interface" "storage_primary" {
+  for_each = merge([
+    for pool_name, pool in var.storage_pools : {
+      for idx in range(pool.nodes_count) : "${pool_name}-${idx}" => {
+        az_index    = idx % length(var.azs)
+        pool_name   = pool_name
+        pool_config = pool
+        index       = idx
+      }
+    }
+  ]...)
+
+  subnet_id       = aws_subnet.mgmt[each.value.az_index].id
+  # Continue IP allocation after mgmt nodes
+  private_ips     = [cidrhost(var.mgmt_subnet_cidrs[each.value.az_index], each.value.index + var.mgmt_pool.nodes_count + 10)]
+  security_groups = [aws_security_group.allow_vpc_internal.id]
+
+  tags = {
+    Name = "storage-mgmt-${each.value.pool_name}-${each.value.index}"
+    Service = "mgx-storage"
   }
 }
 
@@ -40,8 +83,13 @@ resource "aws_network_interface" "storage_secondary" {
   subnet_id       = aws_subnet.storage[each.value.az_index].id
   private_ips     = [cidrhost(var.storage_subnet_cidrs[each.value.az_index], each.value.index + 10)]
   security_groups = [aws_security_group.allow_vpc_internal.id]
-}
 
+  tags = {
+    Name = "storage-data-${each.value.pool_name}-${each.value.index}"
+    Service = "mgx-storage"
+  }
+
+}
 
 resource "aws_iam_role" "storage_s3_full_access" {
   for_each = var.storage_pools
@@ -167,12 +215,15 @@ resource "aws_instance" "mgmt_node" {
   instance_type = var.mgmt_pool.nodes_instance_type
   key_name      = aws_key_pair.deployer.key_name
   availability_zone = var.azs[each.value.az_index]
-  subnet_id        = aws_subnet.mgmt[each.value.az_index].id
-  vpc_security_group_ids = [aws_security_group.allow_vpc_internal.id]
+
+  network_interface {
+    device_index         = 0
+    network_interface_id = aws_network_interface.mgmt_primary[each.key].id
+  }
 
   tags = {
     Name    = "mgmt-node-${each.value.index}"
-    Service = "mgx-mgmt"
+    Service = "mgx-storage"
   }
 }
 
@@ -197,6 +248,12 @@ resource "aws_instance" "storage_node" {
   # Primary network interface settings here (top-level)
   subnet_id              = aws_subnet.mgmt[each.value.az_index].id
   vpc_security_group_ids = [aws_security_group.allow_vpc_internal.id]
+
+  # Primary mgmt ENI
+  network_interface {
+    device_index         = 0
+    network_interface_id = aws_network_interface.storage_primary[each.key].id
+  }
 
   # Secondary network interface must reference ENI ID only
   network_interface {
@@ -233,7 +290,7 @@ resource "aws_s3_bucket" "s3storage" {
   force_destroy = each.value.force_destroy
 
   tags = {
-    Service = "mgx-storage"
     Pool    = each.value.pool_name
+    Service = "mgx-storage"
   }
 }
