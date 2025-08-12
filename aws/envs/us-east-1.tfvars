@@ -3,8 +3,8 @@ region = "us-east-1"
 vpc_id = "vpc-095dc0635c6244fe3"
 
 azs = ["us-east-1a",
-  "us-east-1b",
-"us-east-1c"]
+       "us-east-1b",
+       "us-east-1c"]
 
 mgmt_subnet_cidrs = [
   "172.31.96.0/20",  # us-east-1a primary
