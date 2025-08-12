@@ -1,0 +1,40 @@
+MGX_TGT_TYPE="nvmf_tgt"
+MGX_SPDK_NOHUGE="n"
+MGX_HUGEPAGE_SIZE="4096"
+MGX_CPUMASK="0xC"
+MGX_MAINCORE="2"
+MGX_SOCKET="/var/tmp/spdk_app.sock"
+MGX_UNIX_SOCK_USER="mgx-core"
+MGX_S3BACKER_NBD_MAX_SEC_KB="1024"
+MGX_S3BACKER_WAIT_SEC=2
+MGX_S3BACKER_ARGS="\
+    --nbd \
+    --nbd-flag=--filter=cache \
+    --nbd-param=cache=writethrough \
+    --nbd-param=cache-min-block-size=4096 \
+    --nbd-param=cache-high-threshold=95 \
+    --nbd-param=cache-low-threshold=80 \
+    --nbd-param=cache-on-read=true \
+    --region=us-east-1 \
+    --accessEC2IAM=ec2-s3-<bucket>-access-role \
+    --force \
+    --debug \
+    --debug-http \
+    --blockSize=1M \
+    --blockCacheThreads=30 \
+    --listBlocksThreads=20 \
+    --listBlocks \
+    --prefix=<volume>/ \
+    --blockHashPrefix \
+    --minWriteDelay=5000 \
+    --md5CacheTime=60000 \
+    --blockCacheFile=<rwdiskpath>/<volume>/data \
+    --blockCacheRecoverDirtyBlocks \
+    --blockCacheTimeout=30000 \
+    --blockCacheWriteDelay=15000 \
+    --initialRetryPause=5000 \
+    --maxRetryPause=60000 \
+    --statsFileMirror=<rwdiskpath>/<volume>/stats \
+    --statsFileMirrorInterval=1000 \
+    --directIO \
+    --timeout=30"
