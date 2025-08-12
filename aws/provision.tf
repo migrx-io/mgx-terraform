@@ -8,10 +8,10 @@ resource "null_resource" "provision_mgmt" {
   ]
 
   connection {
-    type                = "ssh"
-    user                = var.ssh_user
-    host                = each.value.private_ip
-    private_key         = file(var.ssh_private_key_path)
+    type        = "ssh"
+    user        = var.ssh_user
+    host        = each.value.private_ip
+    private_key = file(var.ssh_private_key_path)
 
     bastion_host        = aws_instance.bastion[0].public_ip
     bastion_user        = var.ssh_user
@@ -41,10 +41,10 @@ resource "null_resource" "provision_storage" {
   ]
 
   connection {
-    type                = "ssh"
-    user                = var.ssh_user
-    host                = each.value.private_ip
-    private_key         = file(var.ssh_private_key_path)
+    type        = "ssh"
+    user        = var.ssh_user
+    host        = each.value.private_ip
+    private_key = file(var.ssh_private_key_path)
 
     bastion_host        = aws_instance.bastion[0].public_ip
     bastion_user        = var.ssh_user

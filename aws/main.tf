@@ -12,7 +12,7 @@ locals {
   # max mgmt IP offset used per AZ (start at 10 + floor((count-1)/AZs))
   mgmt_max_ip_offset_per_az = {
     for az_index in range(length(var.azs)) :
-    az_index => 10 + floor( (var.mgmt_pool.nodes_count - 1) / length(var.azs) )
+    az_index => 10 + floor((var.mgmt_pool.nodes_count - 1) / length(var.azs))
   }
 
   # storage mgmt IP start offset per AZ: after mgmt max + reserved count + 1
@@ -33,9 +33,9 @@ locals {
   all_storage_nodes = flatten([
     for pool_name, pool in var.storage_pools : [
       for idx in range(pool.nodes_count) : {
-        pool_name      = pool_name
-        az_index       = idx % length(var.azs)
-        index_in_pool  = idx
+        pool_name     = pool_name
+        az_index      = idx % length(var.azs)
+        index_in_pool = idx
       }
     ]
   ])
@@ -61,9 +61,9 @@ locals {
       for pool_name, pool in var.storage_pools : {
         for idx in range(pool.nodes_count) :
         "${pool_name}-${idx}" =>
-          local.pool_reserved_ip_offsets[pool_name] +
-          floor(idx / length(var.azs))
-          if idx % length(var.azs) == az
+        local.pool_reserved_ip_offsets[pool_name] +
+        floor(idx / length(var.azs))
+        if idx % length(var.azs) == az
       }
     ]...)
   }
@@ -80,7 +80,7 @@ resource "null_resource" "validate_nodes_count" {
       error_message = "One or more storage pools have nodes_count greater than reserved_ip_count (${local.reserved_ip_count}). Please create a new pool if you need more resources."
     }
     precondition {
-      condition = var.mgmt_pool.nodes_count <= local.reserved_ip_count
+      condition     = var.mgmt_pool.nodes_count <= local.reserved_ip_count
       error_message = "Management pool nodes_count (${var.mgmt_pool.nodes_count}) exceeds reserved_ip_count (${local.reserved_ip_count}). Please create a new pool if you need more resources."
     }
   }
@@ -99,7 +99,7 @@ resource "aws_subnet" "mgmt" {
   availability_zone = var.azs[count.index]
 
   tags = {
-    Name = "mgmt-subnet-${var.azs[count.index]}"
+    Name    = "mgmt-subnet-${var.azs[count.index]}"
     Service = "mgx-storage"
   }
 }
@@ -111,7 +111,7 @@ resource "aws_subnet" "storage" {
   availability_zone = var.azs[count.index]
 
   tags = {
-    Name = "storage-subnet-${var.azs[count.index]}"
+    Name    = "storage-subnet-${var.azs[count.index]}"
     Service = "mgx-storage"
   }
 }
@@ -320,13 +320,13 @@ resource "aws_instance" "mgmt_node" {
   for_each = {
     for idx in range(var.mgmt_pool.nodes_count) : "mgmt-${idx}" => {
       az_index = idx % length(var.azs)
-      index = idx
+      index    = idx
     }
   }
 
-  ami           = var.mgmt_pool.nodes_ami
-  instance_type = var.mgmt_pool.nodes_instance_type
-  key_name      = aws_key_pair.deployer.key_name
+  ami               = var.mgmt_pool.nodes_ami
+  instance_type     = var.mgmt_pool.nodes_instance_type
+  key_name          = aws_key_pair.deployer.key_name
   availability_zone = var.azs[each.value.az_index]
 
   network_interface {
@@ -352,9 +352,9 @@ resource "aws_instance" "storage_node" {
     }
   ]...)
 
-  ami           = each.value.pool_config.nodes_ami
-  instance_type = each.value.pool_config.nodes_instance_type
-  key_name      = aws_key_pair.deployer.key_name
+  ami                  = each.value.pool_config.nodes_ami
+  instance_type        = each.value.pool_config.nodes_instance_type
+  key_name             = aws_key_pair.deployer.key_name
   iam_instance_profile = aws_iam_instance_profile.ec2_profile[each.value.pool_name].name
   availability_zone    = var.azs[each.value.az_index]
 

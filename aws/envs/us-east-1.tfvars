@@ -4,34 +4,34 @@ vpc_id = "vpc-095dc0635c6244fe3"
 
 reserved_ip_count = 3
 
-azs = ["us-east-1a", 
-       "us-east-1b", 
-       "us-east-1c"]
+azs = ["us-east-1a",
+  "us-east-1b",
+"us-east-1c"]
 
 mgmt_subnet_cidrs = [
   "172.31.96.0/20",  # us-east-1a primary
-  "172.31.112.0/20",  # us-east-1b primary
-  "172.31.128.0/20"   # us-east-1c primary
+  "172.31.112.0/20", # us-east-1b primary
+  "172.31.128.0/20"  # us-east-1c primary
 ]
 
 storage_subnet_cidrs = [
-  "172.31.144.0/20",   # us-east-1a secondary
-  "172.31.160.0/20",  # us-east-1b secondary
-  "172.31.176.0/20"   # us-east-1c secondary
+  "172.31.144.0/20", # us-east-1a secondary
+  "172.31.160.0/20", # us-east-1b secondary
+  "172.31.176.0/20"  # us-east-1c secondary
 ]
 
 bastion = {
-    enable        = true
-    vpc_subnet    = "subnet-06b5191fc3bf0caff"
-    ami           = "ami-0f9de6e2d2f067fca"
-    instance_type = "t2.micro"
-    whitelist_ips = ["0.0.0.0/0"]
+  enable        = true
+  vpc_subnet    = "subnet-06b5191fc3bf0caff"
+  ami           = "ami-0f9de6e2d2f067fca"
+  instance_type = "t2.micro"
+  whitelist_ips = ["0.0.0.0/0"]
 }
 
 mgmt_pool = {
-    nodes_ami           = "ami-0f9de6e2d2f067fca"
-    nodes_instance_type = "t3a.xlarge"
-    nodes_count         = 7
+  nodes_ami           = "ami-0f9de6e2d2f067fca"
+  nodes_instance_type = "t3a.xlarge"
+  nodes_count         = 7
 }
 
 storage_pools = {

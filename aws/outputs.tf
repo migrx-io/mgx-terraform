@@ -8,7 +8,7 @@ output "mgmt_node_private_ips" {
   description = "Private IPs of the management nodes"
   value = [
     for ni in aws_network_interface.mgmt_primary :
-      tolist(ni.private_ips)[0]
+    tolist(ni.private_ips)[0]
   ]
 }
 
@@ -18,7 +18,7 @@ output "storage_node_mgmt_private_ips" {
     for pool_name in keys(var.storage_pools) :
     pool_name => [
       for idx in range(var.storage_pools[pool_name].nodes_count) :
-        tolist(aws_network_interface.storage_primary["${pool_name}-${idx}"].private_ips)[0]
+      tolist(aws_network_interface.storage_primary["${pool_name}-${idx}"].private_ips)[0]
     ]
   }
 }
@@ -28,8 +28,8 @@ output "storage_node_data_private_ips" {
   value = {
     for pool_name in keys(var.storage_pools) :
     pool_name => [
-      for idx in range(var.storage_pools[pool_name].nodes_count) : 
-        tolist(aws_network_interface.storage_secondary["${pool_name}-${idx}"].private_ips)[0]
+      for idx in range(var.storage_pools[pool_name].nodes_count) :
+      tolist(aws_network_interface.storage_secondary["${pool_name}-${idx}"].private_ips)[0]
     ]
   }
 }

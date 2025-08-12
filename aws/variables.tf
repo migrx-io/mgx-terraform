@@ -35,7 +35,7 @@ variable "bastion" {
     enable        = bool
     vpc_subnet    = string
     ami           = string
-    instance_type = string 
+    instance_type = string
     whitelist_ips = list(string)
   })
 }
@@ -55,9 +55,9 @@ variable "ssh_private_key_path" {
 variable "mgmt_pool" {
   description = "Management node pool parameters"
   type = object({
-    nodes_ami           = string       # AMI for mgmt nodes
-    nodes_instance_type = string       # EC2 instance type
-    nodes_count         = number       # Number of mgmt nodes
+    nodes_ami           = string # AMI for mgmt nodes
+    nodes_instance_type = string # EC2 instance type
+    nodes_count         = number # Number of mgmt nodes
   })
 }
 
