@@ -126,7 +126,7 @@ aws/
     ssh-add ~/.ssh/id_rsa
 
 
-    ssh ubuntu@<bastion_public_ip>
+    ssh -A ubuntu@<bastion_public_ip>
     ```
 
 6. SSH into storage nodes from bastion (SSH Agent Forwarding)
@@ -134,7 +134,7 @@ aws/
     Get private IPs from outputs:
 
     ```
-    terraform output storage_node_private_ips
+    terraform output storage_node_mgmt_private_ips
     ```
 
     Then SSH from bastion:
