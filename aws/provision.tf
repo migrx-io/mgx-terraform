@@ -18,15 +18,29 @@ resource "null_resource" "provision_mgmt" {
     bastion_private_key = file(var.ssh_private_key_path)
   }
 
-  provisioner "file" {
-    source      = "../scripts/setup-mgmt.sh"
-    destination = "/tmp/setup-mgmt.sh"
+  # Create /tmp/scripts directory
+  provisioner "remote-exec" {
+    inline = [
+      "mkdir -p /tmp/mgx-scripts"
+    ]
+  }
+
+  # Copy each file in scripts directory
+  dynamic "provisioner" {
+    for_each = fileset("../scripts", "*")
+    content {
+      file {
+        source      = "../scripts/${provisioner.key}"
+        destination = "/tmp/mgx-scripts/${provisioner.key}"
+      }
+    }
   }
 
   provisioner "remote-exec" {
     inline = [
-      "chmod +x /tmp/setup-mgmt.sh",
-      "sudo /tmp/setup-mgmt.sh"
+      "cd /tmp/mgx-scripts"
+      "chmod +x setup-mgmt.sh",
+      "sudo setup-mgmt.sh"
     ]
   }
 }
@@ -51,15 +65,29 @@ resource "null_resource" "provision_storage" {
     bastion_private_key = file(var.ssh_private_key_path)
   }
 
-  provisioner "file" {
-    source      = "../scripts/setup-storage.sh"
-    destination = "/tmp/setup-storage.sh"
+  # Create /tmp/scripts directory
+  provisioner "remote-exec" {
+    inline = [
+      "mkdir -p /tmp/mgx-scripts"
+    ]
+  }
+
+ # Copy each file in scripts directory
+  dynamic "provisioner" {
+    for_each = fileset("../scripts", "*")
+    content {
+      file {
+        source      = "../scripts/${provisioner.key}"
+        destination = "/tmp/mgx-scripts/${provisioner.key}"
+      }
+    }
   }
 
   provisioner "remote-exec" {
     inline = [
-      "chmod +x /tmp/setup-storage.sh",
-      "sudo /tmp/setup-storage.sh"
+      "cd /tmp/mgx-scripts"
+      "chmod +x setup-storage.sh",
+      "sudo setup-storage.sh"
     ]
   }
 }
