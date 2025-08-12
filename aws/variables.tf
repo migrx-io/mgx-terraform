@@ -3,20 +3,14 @@ variable "region" {
   type        = string
 }
 
-variable "vpc_id" {
-  description = "VPC ID to use"
-  type        = string
-}
-
-variable "reserved_ip_count" {
-  description = "Number of reserved IPs per pool"
-  type        = number
-  default     = 3
-}
-
 variable "azs" {
   description = "List of availability zones"
   type        = list(string)
+}
+
+variable "vpc_id" {
+  description = "VPC ID to use"
+  type        = string
 }
 
 variable "mgmt_subnet_cidrs" {
@@ -27,6 +21,12 @@ variable "mgmt_subnet_cidrs" {
 variable "storage_subnet_cidrs" {
   description = "CIDRs for storage subnets (one per AZ)"
   type        = list(string)
+}
+
+variable "reserved_ip_count" {
+  description = "Number of reserved IPs per pool"
+  type        = number
+  default     = 3
 }
 
 variable "bastion" {
@@ -56,6 +56,30 @@ variable "ssh_public_key_path" {
   description = "Path to SSH private key used for EC2 access"
   type        = string
   default     = "~/.ssh/id_rsa.pub"
+}
+
+variable "mgmt_iface" {
+  description = "Managment network iface"
+  type        = string
+  default     = "ens5"
+}
+
+variable "db_password" {
+  description = "Meta database password"
+  type        = string
+  sensitive   = true
+}
+
+variable "api_key" {
+  description = "Cluster API key"
+  type        = string
+  sensitive   = true
+}
+
+variable "admin_password" {
+  description = "Admin user password"
+  type        = string
+  sensitive   = true
 }
 
 variable "mgmt_pool" {

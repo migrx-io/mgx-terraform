@@ -1,10 +1,11 @@
-# Run on mgmt nodes
+# Run on mgmt and storage nodes
+
 resource "null_resource" "provision_mgmt" {
   for_each = aws_instance.mgmt_node
 
   depends_on = [
     aws_instance.bastion,
-    aws_instance.mgmt_node
+    aws_instance.mgmt_node,
   ]
 
   connection {
@@ -25,20 +26,14 @@ resource "null_resource" "provision_mgmt" {
     ]
   }
 
-  # Copy each file in scripts directory
-  dynamic "provisioner" {
-    for_each = fileset("../scripts", "*")
-    content {
-      file {
-        source      = "../scripts/${provisioner.key}"
-        destination = "/tmp/mgx-scripts/${provisioner.key}"
-      }
-    }
+  provisioner "file" {
+    source      = "../scripts"
+    destination = "/tmp/mgx-scripts"
   }
 
   provisioner "remote-exec" {
     inline = [
-      "cd /tmp/mgx-scripts"
+      "cd /tmp/mgx-scripts",
       "chmod +x setup-mgmt.sh",
       "sudo setup-mgmt.sh"
     ]
@@ -51,7 +46,7 @@ resource "null_resource" "provision_storage" {
 
   depends_on = [
     aws_instance.bastion,
-    aws_instance.storage_node
+    aws_instance.storage_node,
   ]
 
   connection {
@@ -72,20 +67,14 @@ resource "null_resource" "provision_storage" {
     ]
   }
 
- # Copy each file in scripts directory
-  dynamic "provisioner" {
-    for_each = fileset("../scripts", "*")
-    content {
-      file {
-        source      = "../scripts/${provisioner.key}"
-        destination = "/tmp/mgx-scripts/${provisioner.key}"
-      }
-    }
+  provisioner "file" {
+    source      = "../scripts"
+    destination = "/tmp/mgx-scripts"
   }
 
   provisioner "remote-exec" {
     inline = [
-      "cd /tmp/mgx-scripts"
+      "cd /tmp/mgx-scripts",
       "chmod +x setup-storage.sh",
       "sudo setup-storage.sh"
     ]
