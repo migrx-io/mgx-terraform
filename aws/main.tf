@@ -89,7 +89,7 @@ resource "null_resource" "validate_nodes_count" {
 
 resource "aws_key_pair" "deployer" {
   key_name   = "deployer-key"
-  public_key = file(var.ssh_private_key_path)
+  public_key = file(var.ssh_public_key_path)
 }
 
 resource "aws_subnet" "mgmt" {
@@ -224,7 +224,10 @@ resource "aws_iam_role" "storage_s3_full_access" {
 }
 
 resource "aws_iam_role_policy" "s3_bucket_only" {
-  for_each = var.storage_pools
+
+  for_each = {
+    for k, v in var.storage_pools : k => v if length(v.s3_bucket_names) > 0
+  }
 
   name = "bucket-${each.key}-access-policy"
   role = aws_iam_role.storage_s3_full_access[each.key].id

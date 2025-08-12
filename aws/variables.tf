@@ -49,6 +49,12 @@ variable "ssh_user" {
 variable "ssh_private_key_path" {
   description = "Path to SSH private key used for EC2 access"
   type        = string
+  default     = "~/.ssh/id_rsa"
+}
+
+variable "ssh_public_key_path" {
+  description = "Path to SSH private key used for EC2 access"
+  type        = string
   default     = "~/.ssh/id_rsa.pub"
 }
 

@@ -19,7 +19,7 @@ resource "null_resource" "provision_mgmt" {
   }
 
   provisioner "file" {
-    source      = "scripts/setup-mgmt.sh"
+    source      = "../scripts/setup-mgmt.sh"
     destination = "/tmp/setup-mgmt.sh"
   }
 
@@ -52,7 +52,7 @@ resource "null_resource" "provision_storage" {
   }
 
   provisioner "file" {
-    source      = "scripts/setup-storage.sh"
+    source      = "../scripts/setup-storage.sh"
     destination = "/tmp/setup-storage.sh"
   }
 
