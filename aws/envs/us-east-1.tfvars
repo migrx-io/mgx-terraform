@@ -2,11 +2,9 @@ region = "us-east-1"
 
 vpc_id = "vpc-095dc0635c6244fe3"
 
-reserved_ip_count = 3
-
 azs = ["us-east-1a",
-  "us-east-1b",
-"us-east-1c"]
+       "us-east-1b",
+       "us-east-1c"]
 
 mgmt_subnet_cidrs = [
   "172.31.96.0/20",  # us-east-1a primary
@@ -31,7 +29,7 @@ bastion = {
 mgmt_pool = {
   nodes_ami           = "ami-0f9de6e2d2f067fca"
   nodes_instance_type = "t3a.xlarge"
-  nodes_count         = 7
+  nodes_count         = 1
 }
 
 storage_pools = {
@@ -45,18 +43,8 @@ storage_pools = {
   pool2 = {
     nodes_ami           = "ami-0f9de6e2d2f067fca"
     nodes_instance_type = "c5ad.2xlarge"
-    nodes_count         = 8
+    nodes_count         = 0
     s3_bucket_names     = []
     s3_force_destroy    = true
   }
-  pool3 = {
-    nodes_ami           = "ami-0f9de6e2d2f067fca"
-    nodes_instance_type = "c5ad.2xlarge"
-    nodes_count         = 3
-    s3_bucket_names     = []
-    s3_force_destroy    = true
-  }
-
-
-
 }
