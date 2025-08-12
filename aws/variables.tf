@@ -11,7 +11,7 @@ variable "vpc_id" {
 variable "reserved_ip_count" {
   description = "Number of reserved IPs per pool"
   type        = number
-  default     = 10
+  default     = 3
 }
 
 variable "azs" {

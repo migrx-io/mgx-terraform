@@ -12,7 +12,7 @@ locals {
   # max mgmt IP offset used per AZ (start at 10 + floor((count-1)/AZs))
   mgmt_max_ip_offset_per_az = {
     for az_index in range(length(var.azs)) :
-    az_index => 10 + floor((var.mgmt_pool.nodes_count - 1) / length(var.azs))
+    az_index => 10
   }
 
   # storage mgmt IP start offset per AZ: after mgmt max + reserved count + 1
@@ -75,13 +75,13 @@ resource "null_resource" "validate_nodes_count" {
     precondition {
       condition = alltrue([
         for pool in var.storage_pools :
-        pool.nodes_count <= local.reserved_ip_count
+        pool.nodes_count <= local.reserved_ip_count * length(var.azs)
       ])
-      error_message = "One or more storage pools have nodes_count greater than reserved_ip_count (${local.reserved_ip_count}). Please create a new pool if you need more resources."
+      error_message = "One or more storage pools have nodes_count greater than reserved_ip_count (${local.reserved_ip_count * length(var.azs)}). Please create a new pool if you need more resources."
     }
     precondition {
-      condition     = var.mgmt_pool.nodes_count <= local.reserved_ip_count
-      error_message = "Management pool nodes_count (${var.mgmt_pool.nodes_count}) exceeds reserved_ip_count (${local.reserved_ip_count}). Please create a new pool if you need more resources."
+      condition     = var.mgmt_pool.nodes_count <= local.reserved_ip_count * length(var.azs)
+      error_message = "Management pool nodes_count (${var.mgmt_pool.nodes_count}) exceeds reserved_ip_count (${local.reserved_ip_count * length(var.azs)}). Please create a new pool if you need more resources."
     }
   }
 }
@@ -130,7 +130,7 @@ resource "aws_network_interface" "mgmt_primary" {
   private_ips = [
     cidrhost(
       var.mgmt_subnet_cidrs[each.value.az_index],
-      local.reserved_ip_count + floor(each.value.index / length(var.azs))
+      10 + floor(each.value.index / length(var.azs))
     )
   ]
 
@@ -190,7 +190,7 @@ resource "aws_network_interface" "storage_secondary" {
   private_ips = [
     cidrhost(
       var.storage_subnet_cidrs[each.value.az_index],
-      local.reserved_ip_count +
+      10 +
       lookup(local.storage_node_ip_offsets_shifted[each.value.az_index], each.key)
     )
   ]
