@@ -2,6 +2,8 @@ region = "us-east-1"
 
 vpc_id = "vpc-095dc0635c6244fe3"
 
+reserved_ip_count = 3
+
 azs = ["us-east-1a", 
        "us-east-1b", 
        "us-east-1c"]

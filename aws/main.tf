@@ -1,6 +1,6 @@
 locals {
 
-  reserved_ip_count = 10
+  reserved_ip_count = var.reserved_ip_count
 
   mgmt_nodes_per_az = {
     for az_index in range(length(var.azs)) :
@@ -68,8 +68,24 @@ locals {
     ]...)
   }
 
-
 }
+
+resource "null_resource" "validate_nodes_count" {
+  lifecycle {
+    precondition {
+      condition = alltrue([
+        for pool in var.storage_pools :
+        pool.nodes_count <= local.reserved_ip_count
+      ])
+      error_message = "One or more storage pools have nodes_count greater than reserved_ip_count (${local.reserved_ip_count}). Please create a new pool if you need more resources."
+    }
+    precondition {
+      condition = var.mgmt_pool.nodes_count <= local.reserved_ip_count
+      error_message = "Management pool nodes_count (${var.mgmt_pool.nodes_count}) exceeds reserved_ip_count (${local.reserved_ip_count}). Please create a new pool if you need more resources."
+    }
+  }
+}
+
 
 resource "aws_key_pair" "deployer" {
   key_name   = "deployer-key"

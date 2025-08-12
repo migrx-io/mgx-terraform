@@ -8,6 +8,12 @@ variable "vpc_id" {
   type        = string
 }
 
+variable "reserved_ip_count" {
+  description = "Number of reserved IPs per pool"
+  type        = number
+  default     = 10
+}
+
 variable "azs" {
   description = "List of availability zones"
   type        = list(string)
