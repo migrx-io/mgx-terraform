@@ -31,11 +31,17 @@ resource "null_resource" "provision_mgmt" {
     destination = "/tmp/mgx-scripts"
   }
 
+  provisioner "file" {
+    source      = "./envs/${var.region}/secrets.env"
+    destination = "/tmp/mgx-scripts/secrets.env"
+  }
+
   provisioner "remote-exec" {
     inline = [
       "cd /tmp/mgx-scripts/scripts",
       "chmod +x setup-mgmt.sh",
-      "sudo ./setup-mgmt.sh"
+      "sudo ./setup-mgmt.sh",
+      "cd /tmp && rm -rf /tmp/mgx-scripts"
     ]
   }
 }
@@ -72,11 +78,17 @@ resource "null_resource" "provision_storage" {
     destination = "/tmp/mgx-scripts"
   }
 
+  provisioner "file" {
+    source      = "./envs/${var.region}/secrets.env"
+    destination = "/tmp/mgx-scripts/secrets.env"
+  }
+
   provisioner "remote-exec" {
     inline = [
       "cd /tmp/mgx-scripts/scripts",
       "chmod +x setup-storage.sh",
-      "sudo ./setup-storage.sh"
+      "sudo ./setup-storage.sh",
+      "cd /tmp && rm -rf /tmp/mgx-scripts"
     ]
   }
 }
