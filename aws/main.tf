@@ -86,10 +86,39 @@ resource "null_resource" "validate_nodes_count" {
   }
 }
 
-
 resource "aws_key_pair" "deployer" {
   key_name   = "deployer-key"
   public_key = file(var.ssh_public_key_path)
+}
+
+resource "aws_eip" "nat_eip" {
+  domain = "vpc"
+}
+
+resource "aws_nat_gateway" "nat_gw" {
+  allocation_id = aws_eip.nat_eip.id
+  subnet_id     = var.bastion.vpc_subnet
+}
+
+resource "aws_route_table" "private_rt" {
+  vpc_id = var.vpc_id
+
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat_gw.id
+  }
+}
+
+resource "aws_route_table_association" "mgmt_rta" {
+  count          = length(var.azs)
+  subnet_id      = aws_subnet.mgmt[count.index].id
+  route_table_id = aws_route_table.private_rt.id
+}
+
+resource "aws_route_table_association" "storage_rta" {
+  count          = length(var.azs)
+  subnet_id      = aws_subnet.storage[count.index].id
+  route_table_id = aws_route_table.private_rt.id
 }
 
 resource "aws_subnet" "mgmt" {
