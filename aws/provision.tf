@@ -33,9 +33,9 @@ resource "null_resource" "provision_mgmt" {
 
   provisioner "remote-exec" {
     inline = [
-      "cd /tmp/mgx-scripts",
+      "cd /tmp/mgx-scripts/scripts",
       "chmod +x setup-mgmt.sh",
-      "sudo setup-mgmt.sh"
+      "sudo ./setup-mgmt.sh"
     ]
   }
 }
@@ -74,9 +74,9 @@ resource "null_resource" "provision_storage" {
 
   provisioner "remote-exec" {
     inline = [
-      "cd /tmp/mgx-scripts",
+      "cd /tmp/mgx-scripts/scripts",
       "chmod +x setup-storage.sh",
-      "sudo setup-storage.sh"
+      "sudo ./setup-storage.sh"
     ]
   }
 }
