@@ -6,6 +6,7 @@ resource "null_resource" "provision_mgmt" {
   depends_on = [
     aws_instance.bastion,
     aws_instance.mgmt_node,
+    aws_nat_gateway.nat_gw,
   ]
 
   connection {
@@ -38,10 +39,18 @@ resource "null_resource" "provision_mgmt" {
 
   provisioner "remote-exec" {
     inline = [
+      <<EOC
+  echo '${join("\n", [for ni in aws_network_interface.mgmt_primary : tolist(ni.private_ips)[0]])}' > /tmp/mgx-scripts/storage_mgmt_ips.txt
+  EOC
+    ]
+  }
+
+  provisioner "remote-exec" {
+    inline = [
       "cd /tmp/mgx-scripts/scripts",
       "chmod +x setup-mgmt.sh",
       "sudo ./setup-mgmt.sh",
-      "cd /tmp && rm -rf /tmp/mgx-scripts"
+      # "cd /tmp && rm -rf /tmp/mgx-scripts"
     ]
   }
 }
@@ -53,6 +62,7 @@ resource "null_resource" "provision_storage" {
   depends_on = [
     aws_instance.bastion,
     aws_instance.storage_node,
+    aws_nat_gateway.nat_gw,
   ]
 
   connection {
@@ -85,10 +95,28 @@ resource "null_resource" "provision_storage" {
 
   provisioner "remote-exec" {
     inline = [
+      <<EOC
+
+  echo '${join("\n", [
+    for k, eni in aws_network_interface.storage_primary :
+    tolist(eni.private_ips)[0] if startswith(k, split("-", each.key)[0])
+  ])}' >> /tmp/mgx-scripts/storage_mgmt_ips.txt
+
+  echo '${join("\n", [
+    for k, eni in aws_network_interface.storage_secondary :
+    tolist(eni.private_ips)[0] if startswith(k, split("-", each.key)[0])
+  ])}' >> /tmp/mgx-scripts/storage_data_ips.txt
+
+  EOC
+    ]
+  }
+
+  provisioner "remote-exec" {
+    inline = [
       "cd /tmp/mgx-scripts/scripts",
       "chmod +x setup-storage.sh",
       "sudo ./setup-storage.sh",
-      "cd /tmp && rm -rf /tmp/mgx-scripts"
+      # "cd /tmp && rm -rf /tmp/mgx-scripts"
     ]
   }
 }

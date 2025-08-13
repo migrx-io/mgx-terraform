@@ -33,4 +33,3 @@ output "storage_node_data_private_ips" {
     ]
   }
 }
-
