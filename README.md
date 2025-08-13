@@ -110,7 +110,7 @@ aws/
 4. Apply the configuration
 
     ```
-    terraform apply -var-file=./envs/us-east-1.tfvars
+    terraform apply -var-file=./envs/us-east-1/vars.tfvars
     ```
 
 5. Get bastion IP and SSH into bastion
