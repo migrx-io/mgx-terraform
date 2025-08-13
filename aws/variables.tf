@@ -58,30 +58,6 @@ variable "ssh_public_key_path" {
   default     = "~/.ssh/id_rsa.pub"
 }
 
-variable "mgmt_iface" {
-  description = "Managment network iface"
-  type        = string
-  default     = "ens5"
-}
-
-variable "db_password" {
-  description = "Meta database password"
-  type        = string
-  sensitive   = true
-}
-
-variable "api_key" {
-  description = "Cluster API key"
-  type        = string
-  sensitive   = true
-}
-
-variable "admin_password" {
-  description = "Admin user password"
-  type        = string
-  sensitive   = true
-}
-
 variable "mgmt_pool" {
   description = "Management node pool parameters"
   type = object({

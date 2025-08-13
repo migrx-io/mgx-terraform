@@ -3,7 +3,7 @@
 MGX_VAR_DIR=/var/lib/migrx
 
 # 1. install mgx-core and etc
-sudo sh ./mgx-bootstrap.sh
+sudo sh ./mgx-bootstrap-deb.sh
 
 # 2. Generate mgx-id and mgx-hosts
 if [ ! -f ${MGX_VAR_DIR}/mgx-id ]; then                                         
