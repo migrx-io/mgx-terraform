@@ -36,14 +36,19 @@ sed -i "s/authenticator:.*/authenticator: PasswordAuthenticator/g" /etc/cassandr
 sed -i "s/listen_address:.*/listen_address: ${CASS_RPC_ADDR}/g" /etc/cassandra/cassandra.yaml
 sed -i "s/rpc_address:.*/rpc_address: ${CASS_RPC_ADDR}/g" /etc/cassandra/cassandra.yaml
 sed -i "s/127.0.0.1:7000/${CASS_RPC_ADDR}:7000/g" /etc/cassandra/cassandra.yaml
+sed -i "s/127.0.0.1:7000/${CASS_RPC_ADDR}:7000/g" /etc/cassandra/cassandra.yaml
+sed -i "s/^\(\s*-\s*seeds:\s*\).*/\1\"${CASS_RPC_SEEDS}\"/" /etc/cassandra/cassandra.yaml
 
-
-systemctl start cassandra
+systemctl enable cassandra
+systemctl restart cassandra
 
 # wait while it up
-sleep 200
+echo "Waiting for Cassandra to be ready on port 9042..."
+until nc -z ${CASS_RPC_ADDR} 9042; do
+    sleep 2
+done
 
-cqlsh -u cassandra -p cassandra ${CASS_RPC_ADDR} -e  "ALTER KEYSPACE \"system_auth\" WITH REPLICATION = {'class' : 'NetworkTopologyStrategy', 'dc1' : 1};"
+cqlsh -u cassandra -p cassandra ${CASS_RPC_ADDR} -e  "ALTER KEYSPACE \"system_auth\" WITH REPLICATION = {'class' : 'NetworkTopologyStrategy', 'dc1' : 3};"
 
 cqlsh -u cassandra -p cassandra ${CASS_RPC_ADDR} -e "CREATE ROLE ${CASS_USER} WITH PASSWORD = '${CASS_PASSWD}' AND SUPERUSER = true AND LOGIN = true;"
     
