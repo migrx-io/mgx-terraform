@@ -2,11 +2,16 @@
 import uuid
 import psutil
 import sys
+import requests
+import json
+import os
 
 DATA_IPS_FILE = "../storage_data_ips.txt"
 MGMT_IPS_FILE = "../storage_mgmt_ips.txt"
 SECRETS_FILE = "../secrets.env"
 ENVS_FILE = "./mgx-env"
+MERGED_ENV_FILE = "/etc/mgx-env"
+MANIFEST_FILE = "./cache.yaml"
 
 
 # Collect all IPv4 addresses from all interfaces
@@ -105,6 +110,76 @@ def mgx_cass_seeds():
 
     print(seeds_value)
 
+
+def mgx_cluster():
+
+    merged_env = read_env_file(MERGED_ENV_FILE)
+
+    host = "http://{}:{}".format(merged_env["CASS_RPC_ADDR"], merged_env["MGX_GW_PORT"])
+    username = "admin"
+    password = merged_env["MGX_GW_ADMIN_PASSWD"]
+
+    session = requests.Session()
+    headers = {"accept": "application/json", "Content-Type": "application/json"}
+
+    # Step 1: Authenticate
+    auth_url = f"{host}/api/v1/auth"
+    auth_data = {
+        "cluster": "main",
+        "ns": "main",
+        "username": username,
+        "password": password,
+    }
+
+    resp = session.post(auth_url, headers=headers, json=auth_data)
+    if resp.status_code != 200:
+        print(f"❌ Auth failed! Status code: {resp.status_code}")
+        print(resp.text)
+        sys.exit(1)
+    print(f"✅ Auth success! Status code: {resp.status_code}")
+
+    access_token = resp.json().get("access_token")
+    if not access_token:
+        print("❌ Failed to extract access_token")
+        sys.exit(1)
+
+    auth_headers = {"accept": "application/json", "Authorization": f"JWT {access_token}"}
+
+    # Step 2: Create cluster
+    cluster_url = f"{host}/api/v1/cluster/main"
+    cluster_data = {"node_ids": ["*"], "vip": "127.0.0.1"}
+    resp = session.post(cluster_url, headers={**auth_headers, "Content-Type": "application/json"}, json=cluster_data)
+    if resp.status_code in (200, 201):
+        print(f"✅ Cluster create success! Status code: {resp.status_code}")
+    else:
+        print(f"❌ Cluster create failed! Status code: {resp.status_code}")
+    print(json.dumps(resp.json(), indent=2))
+
+    # Step 3: Get cluster nodes
+    nodes_url = f"{host}/api/v1/cluster/main/nodes"
+    resp = session.get(nodes_url, headers=auth_headers)
+    if resp.status_code in (200, 201):
+        print(f"✅ Get nodes success! Status code: {resp.status_code}")
+    else:
+        print(f"❌ Get nodes failed! Status code: {resp.status_code}")
+    print(json.dumps(resp.json(), indent=2))
+
+    # Step 4: Apply YAML
+    plugins_url = f"{host}/api/v1/cluster/main/plugins"
+    with open(MANIFEST_FILE, "rb") as f:
+        files = {"file": (os.path.basename(MANIFEST_FILE), f, "application/x-yaml")}
+        resp = session.put(plugins_url, headers={"accept": "application/json", "Authorization": f"JWT {access_token}"}, files=files)
+    if resp.status_code in (200, 201):
+        print(f"✅ YAML apply success! Status code: {resp.status_code}")
+    else:
+        print(f"❌ YAML apply failed! Status code: {resp.status_code}")
+
+    try:
+        print(json.dumps(resp.json(), indent=2))
+    except Exception:
+        print(resp.text)
+
+
 if __name__ == "__main__":
         
     op = sys.argv[1]
@@ -119,6 +194,8 @@ if __name__ == "__main__":
             mgx_env()
         elif op == "mgx-cass-seeds":
             mgx_cass_seeds()
+        elif op == "mgx-cluster":
+            mgx_cluster()
 
     except Exception as e:
         print(f"ERROR: {e}", file=sys.stderr)
