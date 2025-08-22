@@ -5,6 +5,17 @@ export DEBIAN_FRONTEND=noninteractive
 MGX_VAR_DIR=/var/lib/migrx
 PY=/opt/mgx-pyenv3/bin/python
 
+# 0. Wait while NAT will be reachable
+while true; do
+  echo "Checking repo availability via NAT..."
+  if curl -s -o /dev/null -w "%{http_code}" https://repo.migrx.io | grep -q "404"; then
+    echo "Repo reachable, NAT is ready."
+    break
+  fi
+  echo "Repo not reachable yet, retrying in 10s..."
+  sleep 10
+done
+
 # 1. install mgx-core and etc
 sh ./mgx-bootstrap-deb.sh
 
