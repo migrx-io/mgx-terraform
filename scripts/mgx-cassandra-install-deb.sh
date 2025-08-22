@@ -48,8 +48,24 @@ until nc -z ${CASS_RPC_ADDR} 9042; do
     sleep 2
 done
 
-cqlsh -u cassandra -p cassandra ${CASS_RPC_ADDR} -e  "ALTER KEYSPACE \"system_auth\" WITH REPLICATION = {'class' : 'NetworkTopologyStrategy', 'dc1' : 3};"
+FIRST_SEED=$(echo "${CASS_RPC_SEEDS}" | cut -d',' -f1)
 
-cqlsh -u cassandra -p cassandra ${CASS_RPC_ADDR} -e "CREATE ROLE ${CASS_USER} WITH PASSWORD = '${CASS_PASSWD}' AND SUPERUSER = true AND LOGIN = true;"
-    
-cqlsh -u $CASS_USER -p $CASS_PASSWD ${CASS_RPC_ADDR} -e "ALTER ROLE cassandra WITH PASSWORD='${CASS_PASSWD}' AND SUPERUSER=false;"
+if [ "${CASS_RPC_ADDR}" = "${FIRST_SEED}" ]; then
+
+    cqlsh -u cassandra -p cassandra ${CASS_RPC_ADDR} -e  "ALTER KEYSPACE \"system_auth\" WITH REPLICATION = {'class' : 'NetworkTopologyStrategy', 'dc1' : 3};"
+
+    cqlsh -u cassandra -p cassandra ${CASS_RPC_ADDR} -e "CREATE ROLE ${CASS_USER} WITH PASSWORD = '${CASS_PASSWD}' AND SUPERUSER = true AND LOGIN = true;"
+        
+    cqlsh -u ${CASS_USER} -p ${CASS_PASSWD} ${CASS_RPC_ADDR} -e "ALTER ROLE cassandra WITH PASSWORD='${CASS_PASSWD}' AND SUPERUSER=false;"
+
+    # install schema
+    apt install -t migrx -y mgx-schema
+    cd /opt/mgx-schema
+    cqlsh -u ${CASS_USER} -p ${CASS_PASSWD} ${CASS_RPC_ADDR} -e 'DROP KEYSPACE IF EXISTS dc1;'
+    ${PYENV}/cassandra-migrate -y -m dev -c dc1.yaml -u ${CASS_USER} -P ${CASS_PASSWD} -H ${CASS_RPC_ADDR} migrate
+    cd -
+    rm -rf /opt/mgx-schema
+
+else
+    echo "This is not the first seed (${CASS_RPC_ADDR}), skipping auth + replication setup."
+fi

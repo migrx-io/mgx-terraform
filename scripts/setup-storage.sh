@@ -35,14 +35,15 @@ export $(xargs < /etc/mgx-env)
 export CASS_RPC_SEEDS=$($PY ./setup-helper.py mgx-cass-seeds)
 sh ./mgx-cassandra-install-deb.sh
 
-
-# 7. Install spdk deps
+# 8. Install spdk deps
 sh ./mgx-spdk-deb.sh
-cp ./mgx-spdk /etc/mgx/spdk
-cp ./mgx-spdk-cache /etc/spdk-cache
+cp ./mgx-spdk /etc/mgx-spdk
+cp ./mgx-spdk-cache /etc/mgx-spdk-cache
 
+# 9. Install plugins 
+sh ./mgx-plugins-deb.sh
 
-# 7. Start services
+# 9. Start services
 mkhomedir_helper mgx-core
 chown mgx-core:mgx-core /etc/mgx-env
 chown mgx-core:mgx-core /etc/mgx-spdk
