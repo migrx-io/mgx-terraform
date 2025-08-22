@@ -52,6 +52,11 @@ FIRST_SEED_IP="${FIRST_SEED%%:*}"
 
 if [ "${CASS_RPC_ADDR}" = "${FIRST_SEED_IP}" ]; then
 
+    echo "Waiting for Cassandra to accept auth..."
+    until cqlsh -u cassandra -p cassandra ${CASS_RPC_ADDR} -e "SHOW HOST" >/dev/null 2>&1; do
+        sleep 5
+    done
+
     cqlsh -u cassandra -p cassandra ${CASS_RPC_ADDR} -e  "ALTER KEYSPACE \"system_auth\" WITH REPLICATION = {'class' : 'NetworkTopologyStrategy', 'dc1' : 3};"
 
     cqlsh -u cassandra -p cassandra ${CASS_RPC_ADDR} -e "CREATE ROLE ${CASS_USER} WITH PASSWORD = '${CASS_PASSWD}' AND SUPERUSER = true AND LOGIN = true;"
