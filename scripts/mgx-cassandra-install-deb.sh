@@ -13,10 +13,10 @@ echo "STEP 2. Clear data.."
 echo ""
 
 # clear data if exists
-# rm -rf /var/lib/cassandra/commitlog/*
-# rm -rf /var/lib/cassandra/data/*
-# rm -rf /var/lib/cassandra/hints/*
-# rm -rf /var/lib/cassandra/saved_caches/*
+rm -rf /var/lib/cassandra/commitlog/*
+rm -rf /var/lib/cassandra/data/*
+rm -rf /var/lib/cassandra/hints/*
+rm -rf /var/lib/cassandra/saved_caches/*
 
 echo "STEP 3. Configurate.."
 echo ""
