@@ -43,9 +43,6 @@ sh ./mgx-spdk-deb.sh
 cp ./mgx-spdk /etc/mgx-spdk
 cp ./mgx-spdk-cache /etc/mgx-spdk-cache
 
-# 9. Install plugins 
-sh ./mgx-plugins-deb.sh
-
 # 9. Start services
 mkhomedir_helper mgx-core
 chown mgx-core:mgx-core /etc/mgx-env
@@ -66,5 +63,8 @@ systemctl restart cron
 
 systemctl restart mgx-spdk
 systemctl restart mgx-spdk-cache
+
+# 10. Install plugins 
+sh ./mgx-plugins-deb.sh
 
 echo "Storage OK!"
