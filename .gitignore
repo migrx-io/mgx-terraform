@@ -41,6 +41,7 @@ terraform.rc
 
 # Ignore all secrets.env files
 **/secrets.env
-
+ 
 # But keep the example file
 !**/secrets.env.example
+!**/vars.tfvars
