@@ -13,11 +13,10 @@ echo "STEP 2. Clear data.."
 echo ""
 
 # clear data if exists
-
-rm -rf /var/lib/cassandra/commitlog/*
-rm -rf /var/lib/cassandra/data/*
-rm -rf /var/lib/cassandra/hints/*
-rm -rf /var/lib/cassandra/saved_caches/*
+# rm -rf /var/lib/cassandra/commitlog/*
+# rm -rf /var/lib/cassandra/data/*
+# rm -rf /var/lib/cassandra/hints/*
+# rm -rf /var/lib/cassandra/saved_caches/*
 
 echo "STEP 3. Configurate.."
 echo ""
@@ -49,8 +48,9 @@ until nc -z ${CASS_RPC_ADDR} 9042; do
 done
 
 FIRST_SEED=$(echo "${CASS_RPC_SEEDS}" | cut -d',' -f1)
+FIRST_SEED_IP="${FIRST_SEED%%:*}"
 
-if [ "${CASS_RPC_ADDR}" = "${FIRST_SEED}" ]; then
+if [ "${CASS_RPC_ADDR}" = "${FIRST_SEED_IP}" ]; then
 
     cqlsh -u cassandra -p cassandra ${CASS_RPC_ADDR} -e  "ALTER KEYSPACE \"system_auth\" WITH REPLICATION = {'class' : 'NetworkTopologyStrategy', 'dc1' : 3};"
 
