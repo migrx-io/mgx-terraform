@@ -6,6 +6,9 @@ MGX_VAR_DIR=/var/lib/migrx
 PY=/opt/mgx-pyenv3/bin/python
 
 # 0. Wait while NAT will be reachable
+
+sleep 30
+
 while true; do
   echo "Checking repo availability via NAT..."
   if curl -s -o /dev/null -w "%{http_code}" https://repo.migrx.io | grep -q "404"; then
