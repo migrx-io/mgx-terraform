@@ -24,17 +24,32 @@ export $(xargs < /etc/mgx-env)
 export CASS_RPC_SEEDS=$($PY ./setup-helper.py mgx-cass-seeds)
 sh ./mgx-cassandra-install-deb.sh
 
+
+# 7. Install spdk deps
+sh ./mgx-spdk-deb.sh
+cp ./mgx-spdk /etc/mgx/spdk
+cp ./mgx-spdk-cache /etc/spdk-cache
+
+
 # 7. Start services
 mkhomedir_helper mgx-core
 chown mgx-core:mgx-core /etc/mgx-env
+chown mgx-core:mgx-core /etc/mgx-spdk
+chown mgx-core:mgx-core /etc/mgx-spdk-cache
 chown mgx-core:mgx-core -R /etc/cassandra/
 
 systemctl enable mgx-core
 systemctl enable mgx-gateway-api
 systemctl enable cron
 
+systemctl enable mgx-spdk
+systemctl enable mgx-spdk-cache
+
 systemctl restart mgx-core
 systemctl restart mgx-gateway-api
 systemctl restart cron
+
+systemctl restart mgx-spdk
+systemctl restart mgx-spdk-cache
 
 echo "Storage OK!"
