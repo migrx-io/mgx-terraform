@@ -8,7 +8,7 @@ spec:
   cluster: main
   descr: Main namespace
   ns: main
-  paths: {}
+  paths: {{}}
 ---
 apiVersion: v1
 kind: api

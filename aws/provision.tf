@@ -112,7 +112,6 @@ resource "null_resource" "provision_storage" {
       pool_name = split("-", each.key)[0],
       config    = var.storage_pools[split("-", each.key)[0]]
 })}
-  EOF
 
   EOC
 ]

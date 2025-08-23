@@ -34,27 +34,29 @@ mgmt_pool = {
 
 storage_pools = {
   pool1 = {
-    description          = "Test pool1"
-    labels               = "name=pool-1,env=dev"
-    nodes_ami            = "ami-0f9de6e2d2f067fca"
-    nodes_instance_type  = "c5ad.2xlarge"
-    nodes_count          = 3
-    max_volumes_count    = 10
-    r_cache_size_in_mib  = 1024
-    rw_cache_size_in_mib = 2048
-    s3_bucket_names      = ["mgxs3storage1"]
-    s3_force_destroy     = true
+    description           = "Test pool1"
+    labels                = "name=pool-1,env=dev"
+    nodes_ami             = "ami-0f9de6e2d2f067fca"
+    nodes_instance_type   = "c5ad.2xlarge"
+    nodes_count           = 3
+    nvme_node_disks_count = 1
+    max_volumes_count     = 10
+    r_cache_size_in_mib   = 1024
+    rw_cache_size_in_mib  = 2048
+    s3_bucket_names       = ["mgxs3storage1"]
+    s3_force_destroy      = true
   }
   pool2 = {
-    description          = "Test pool2"
-    labels               = "name=pool-2,env=dev"
-    nodes_ami            = "ami-0f9de6e2d2f067fca"
-    nodes_instance_type  = "c5ad.2xlarge"
-    nodes_count          = 0
-    max_volumes_count    = 0
-    r_cache_size_in_mib  = 0
-    rw_cache_size_in_mib = 0
-    s3_bucket_names      = []
-    s3_force_destroy     = true
+    description           = "Test pool2"
+    labels                = "name=pool-2,env=dev"
+    nodes_ami             = "ami-0f9de6e2d2f067fca"
+    nodes_instance_type   = "c5ad.2xlarge"
+    nodes_count           = 0
+    nvme_node_disks_count = 0
+    max_volumes_count     = 0
+    r_cache_size_in_mib   = 0
+    rw_cache_size_in_mib  = 0
+    s3_bucket_names       = []
+    s3_force_destroy      = true
   }
 }
