@@ -98,25 +98,32 @@ resource "null_resource" "provision_storage" {
       <<EOC
 
   echo '${join("\n", [
-    for k, eni in aws_network_interface.storage_primary :
-    tolist(eni.private_ips)[0] if startswith(k, split("-", each.key)[0])
-  ])}' >> /tmp/mgx-scripts/storage_mgmt_ips.txt
+      for k, eni in aws_network_interface.storage_primary :
+      tolist(eni.private_ips)[0] if startswith(k, split("-", each.key)[0])
+      ])}' >> /tmp/mgx-scripts/storage_mgmt_ips.txt
 
   echo '${join("\n", [
-    for k, eni in aws_network_interface.storage_secondary :
-    tolist(eni.private_ips)[0] if startswith(k, split("-", each.key)[0])
-  ])}' >> /tmp/mgx-scripts/storage_data_ips.txt
+      for k, eni in aws_network_interface.storage_secondary :
+      tolist(eni.private_ips)[0] if startswith(k, split("-", each.key)[0])
+      ])}' >> /tmp/mgx-scripts/storage_data_ips.txt
+
+  cat > /tmp/mgx-scripts/pool_info.json <<'EOF'
+  ${jsonencode({
+      pool_name = split("-", each.key)[0],
+      config    = var.storage_pools[split("-", each.key)[0]]
+})}
+  EOF
 
   EOC
-    ]
-  }
+]
+}
 
-  provisioner "remote-exec" {
-    inline = [
-      "cd /tmp/mgx-scripts/scripts",
-      "chmod +x setup-storage.sh",
-      "sudo ./setup-storage.sh",
-      # "cd /tmp && rm -rf /tmp/mgx-scripts"
-    ]
-  }
+provisioner "remote-exec" {
+  inline = [
+    "cd /tmp/mgx-scripts/scripts",
+    "chmod +x setup-storage.sh",
+    "sudo ./setup-storage.sh",
+    # "cd /tmp && rm -rf /tmp/mgx-scripts"
+  ]
+}
 }
