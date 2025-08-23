@@ -12,6 +12,8 @@ SECRETS_FILE = "../secrets.env"
 ENVS_FILE = "./mgx-env"
 MERGED_ENV_FILE = "/etc/mgx-env"
 MANIFEST_FILE = "./cache.yaml"
+GEN_MANIFEST_FILE = "./gen_cache.yaml"
+POOL_INFO_FILE= "../pool_info.json"
 
 
 # Collect all IPv4 addresses from all interfaces
@@ -111,6 +113,41 @@ def mgx_cass_seeds():
     print(seeds_value)
 
 
+def generate_cache_yaml():
+
+    # Load pool info JSON
+    with open(POOL_INFO_FILE, "r") as f:
+        d = json.load(f)
+
+    # Load cache template
+    with open(MANIFEST_FILE, "r") as f:
+        template = f.read()
+
+    # Prepare values
+    values = d["config"]
+    values["name"] = d["pool_name"]
+
+    # Read storage data IPs
+    with open(DATA_IPS_FILE, "r") as f:
+        ips = [line.strip() for line in f if line.strip()]
+
+    # Generate UUIDv5 for each IP
+    node_entries = []
+    for ip in ips:
+        u = uuid.uuid5(uuid.NAMESPACE_DNS, ip)
+        node_entries.append(f"{u}:{ip}")
+
+    # Add to values
+    values["node_ips"] = "[" + ", ".join(f'"{entry}"' for entry in node_entries) + "]"
+
+    # Format template
+    rendered = template.format(**values)
+
+    # Save next to cache.yaml
+    with open(GEN_MANIFEST_FILE, "w") as f:
+        f.write(rendered)
+
+
 def mgx_cluster():
 
     merged_env = read_env_file(MERGED_ENV_FILE)
@@ -165,9 +202,12 @@ def mgx_cluster():
     print(json.dumps(resp.json(), indent=2))
 
     # Step 4: Apply YAML
+    # generate file
+    generate_cache_yaml()
+
     plugins_url = f"{host}/api/v1/cluster/main/plugins"
-    with open(MANIFEST_FILE, "rb") as f:
-        files = {"file": (os.path.basename(MANIFEST_FILE), f, "application/x-yaml")}
+    with open(GEN_MANIFEST_FILE, "rb") as f:
+        files = {"file": (os.path.basename(GEN_MANIFEST_FILE), f, "application/x-yaml")}
         resp = session.put(plugins_url, headers={"accept": "application/json", "Authorization": f"JWT {access_token}"}, files=files)
     if resp.status_code in (200, 201):
         print(f"✅ YAML apply success! Status code: {resp.status_code}")
