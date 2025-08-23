@@ -67,4 +67,7 @@ systemctl restart mgx-spdk-cache
 # 10. Install plugins 
 sh ./mgx-plugins-deb.sh
 
+# 11. Install manifest
+$PY ./setup-helper.py mgx-cluster
+
 echo "Storage OK!"

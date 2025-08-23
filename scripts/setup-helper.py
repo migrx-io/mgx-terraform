@@ -148,6 +148,17 @@ def generate_cache_yaml():
         f.write(rendered)
 
 
+def mgx_cluster_wait():
+
+    while True:
+        try:
+            mgx_cluster()
+            return 
+
+        except Exception:
+            time.sleep(2)
+
+
 def mgx_cluster():
 
     merged_env = read_env_file(MERGED_ENV_FILE)
@@ -172,13 +183,14 @@ def mgx_cluster():
     if resp.status_code != 200:
         print(f"❌ Auth failed! Status code: {resp.status_code}")
         print(resp.text)
-        sys.exit(1)
+        raise Exception("Not ready")
+
     print(f"✅ Auth success! Status code: {resp.status_code}")
 
     access_token = resp.json().get("access_token")
     if not access_token:
         print("❌ Failed to extract access_token")
-        sys.exit(1)
+        raise Exception("Not ready")
 
     auth_headers = {"accept": "application/json", "Authorization": f"JWT {access_token}"}
 
@@ -201,6 +213,12 @@ def mgx_cluster():
         print(f"❌ Get nodes failed! Status code: {resp.status_code}")
     print(json.dumps(resp.json(), indent=2))
 
+    # check if nodes is connected
+    if len(resp.json()) == 0:
+        print("❌ No nodes in main cluster")
+        raise Exception("Not ready")
+
+
     # Step 4: Apply YAML
     # generate file
     generate_cache_yaml()
@@ -216,9 +234,17 @@ def mgx_cluster():
 
     try:
         print(json.dumps(resp.json(), indent=2))
+
+        # check if resource applied
+        # chekc namespace only
+        for r in resp.json()[1:]:
+            if r["text"] != "Object already exists":
+                raise Exception("Not ready")
+
+
     except Exception:
         print(resp.text)
-
+        raise Exception("Not ready")
 
 if __name__ == "__main__":
         
@@ -235,7 +261,7 @@ if __name__ == "__main__":
         elif op == "mgx-cass-seeds":
             mgx_cass_seeds()
         elif op == "mgx-cluster":
-            mgx_cluster()
+            mgx_cluster_wait()
 
     except Exception as e:
         print(f"ERROR: {e}", file=sys.stderr)
