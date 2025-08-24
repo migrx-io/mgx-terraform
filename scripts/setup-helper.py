@@ -257,7 +257,7 @@ def mgx_cluster():
     plugins_url = f"{host}/api/v1/cluster/main/plugins"
     with open(GEN_MANIFEST_FILE, "rb") as f:
         files = {"file": (os.path.basename(GEN_MANIFEST_FILE), f, "application/x-yaml")}
-        resp = session.put(plugins_url, headers=auth_headers}, files=files)
+        resp = session.put(plugins_url, headers=auth_headers, files=files)
     if resp.status_code in (200, 201):
         print(f"✅ YAML apply success! Status code: {resp.status_code}")
 
