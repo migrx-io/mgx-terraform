@@ -100,12 +100,12 @@ resource "null_resource" "provision_storage" {
   echo '${join("\n", [
       for k, eni in aws_network_interface.storage_primary :
       tolist(eni.private_ips)[0] if startswith(k, split("-", each.key)[0])
-      ])}' >> /tmp/mgx-scripts/storage_mgmt_ips.txt
+      ])}' > /tmp/mgx-scripts/storage_mgmt_ips.txt
 
   echo '${join("\n", [
       for k, eni in aws_network_interface.storage_secondary :
       tolist(eni.private_ips)[0] if startswith(k, split("-", each.key)[0])
-      ])}' >> /tmp/mgx-scripts/storage_data_ips.txt
+      ])}' > /tmp/mgx-scripts/storage_data_ips.txt
 
   cat > /tmp/mgx-scripts/pool_info.json <<'EOF'
   ${jsonencode({
