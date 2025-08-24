@@ -214,7 +214,7 @@ def mgx_cluster():
         # Create cluster if not exist
         cluster_url = f"{host}/api/v1/cluster/main"
         cluster_data = {"node_ids": ["*"], "vip": "127.0.0.1"}
-        resp = session.post(cluster_url, headers={**auth_headers, "Content-Type": "application/json"}, json=cluster_data)
+        resp = session.post(cluster_url, headers=auth_headers, json=cluster_data)
         if resp.status_code in (200, 201):
             print(f"✅ Cluster create success! Status code: {resp.status_code}")
         else:
