@@ -5,6 +5,8 @@ import sys
 import requests
 import json
 import os
+import time
+
 
 DATA_IPS_FILE = "../storage_data_ips.txt"
 MGMT_IPS_FILE = "../storage_mgmt_ips.txt"
