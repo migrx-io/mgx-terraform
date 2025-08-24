@@ -40,6 +40,19 @@ def mgx_id():
             print(f"{node_uuid}")
 
 
+def is_first_node():
+
+    # Read the storage data IPs
+    with open(DATA_IPS_FILE, "r") as f:
+        data_ips = [line.strip() for line in f if line.strip()]
+
+    first_ip = data_ips[0]
+    if first_ip in get_all_ips():
+        return True
+
+    return False
+
+
 def mgx_hosts():
     # Read the storage data IPs
     with open(MGMT_IPS_FILE, "r") as f:
@@ -164,6 +177,10 @@ def mgx_cluster_wait():
 
 def mgx_cluster():
 
+    # run only on first node
+    if not is_first_node():
+        return
+
     merged_env = read_env_file(MERGED_ENV_FILE)
 
     pool_info = {}
@@ -190,13 +207,12 @@ def mgx_cluster():
     resp = session.post(auth_url, headers=headers, json=auth_data)
     if resp.status_code != 200:
         print(f"❌ Auth failed! Status code: {resp.status_code}")
-        print(resp.text)
-        raise Exception("Not ready")
+        raise Exception(resp.text)
 
     access_token = resp.json().get("access_token")
     if not access_token:
         print("❌ Failed to extract access_token")
-        raise Exception("Not ready")
+        raise Exception("No found token")
 
     auth_headers = {"accept": "application/json", "Authorization": f"JWT {access_token}"}
 
@@ -206,8 +222,7 @@ def mgx_cluster():
     if resp.status_code in (200, 201):
         print(f"✅ Get nodes success! Status code: {resp.status_code}")
     else:
-        print(resp.text)
-        raise Exception("Not ready")
+        raise Exception(resp.text)
 
     if len(resp.json()) == 0:
 
@@ -218,8 +233,7 @@ def mgx_cluster():
         if resp.status_code in (200, 201):
             print(f"✅ Cluster create success! Status code: {resp.status_code}")
         else:
-            print(resp.text)
-            raise Exception("Not ready")
+            raise Exception(resp.text)
 
     # Step 3: Get cluster nodes
     nodes_url = f"{host}/api/v1/cluster/main/nodes"
@@ -227,8 +241,7 @@ def mgx_cluster():
     if resp.status_code in (200, 201):
         print(f"✅ Get nodes success! Status code: {resp.status_code}")
     else:
-        print(resp.text)
-        raise Exception("Not ready")
+        raise Exception(resp.text)
 
     # check if nodes is connected
     if len(resp.json()) != pool_info.get("config", {}).get("nodes_count"):
@@ -238,9 +251,7 @@ def mgx_cluster():
         # Get freenodes list
         nodes_url = f"{host}/api/v1/cluster/freenodes"
         resp = session.get(nodes_url, headers=auth_headers)
-
         free_nodes = resp.json()
-        print(json.dumps(free_nodes, indent=2))
 
         for fn in free_nodes:
             nodes_url = f"{host}/api/v1/cluster/main/nodes/{fn['uid']}"
