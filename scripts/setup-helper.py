@@ -157,13 +157,19 @@ def mgx_cluster_wait():
             mgx_cluster()
             return 
 
-        except Exception:
-            time.sleep(2)
+        except Exception as e:
+            print(f"❌ mgx-cluster failed: {e}")
+            time.sleep(5)
 
 
 def mgx_cluster():
 
     merged_env = read_env_file(MERGED_ENV_FILE)
+
+    pool_info = {}
+    # Load pool info JSON
+    with open(POOL_INFO_FILE, "r") as f:
+        pool_info = json.load(f)
 
     host = "http://{}:{}".format(merged_env["CASS_RPC_ADDR"], merged_env["MGX_GW_PORT"])
     username = "admin"
@@ -187,8 +193,6 @@ def mgx_cluster():
         print(resp.text)
         raise Exception("Not ready")
 
-    print(f"✅ Auth success! Status code: {resp.status_code}")
-
     access_token = resp.json().get("access_token")
     if not access_token:
         print("❌ Failed to extract access_token")
@@ -196,15 +200,26 @@ def mgx_cluster():
 
     auth_headers = {"accept": "application/json", "Authorization": f"JWT {access_token}"}
 
-    # Step 2: Create cluster
-    cluster_url = f"{host}/api/v1/cluster/main"
-    cluster_data = {"node_ids": ["*"], "vip": "127.0.0.1"}
-    resp = session.post(cluster_url, headers={**auth_headers, "Content-Type": "application/json"}, json=cluster_data)
+    # Step 2: Get cluster list
+    nodes_url = f"{host}/api/v1/cluster"
+    resp = session.get(nodes_url, headers=auth_headers)
     if resp.status_code in (200, 201):
-        print(f"✅ Cluster create success! Status code: {resp.status_code}")
+        print(f"✅ Get nodes success! Status code: {resp.status_code}")
     else:
-        print(f"❌ Cluster create failed! Status code: {resp.status_code}")
-    print(json.dumps(resp.json(), indent=2))
+        print(resp.text)
+        raise Exception("Not ready")
+
+    if len(resp.json()) == 0:
+
+        # Create cluster if not exist
+        cluster_url = f"{host}/api/v1/cluster/main"
+        cluster_data = {"node_ids": ["*"], "vip": "127.0.0.1"}
+        resp = session.post(cluster_url, headers={**auth_headers, "Content-Type": "application/json"}, json=cluster_data)
+        if resp.status_code in (200, 201):
+            print(f"✅ Cluster create success! Status code: {resp.status_code}")
+        else:
+            print(resp.text)
+            raise Exception("Not ready")
 
     # Step 3: Get cluster nodes
     nodes_url = f"{host}/api/v1/cluster/main/nodes"
@@ -212,14 +227,28 @@ def mgx_cluster():
     if resp.status_code in (200, 201):
         print(f"✅ Get nodes success! Status code: {resp.status_code}")
     else:
-        print(f"❌ Get nodes failed! Status code: {resp.status_code}")
-    print(json.dumps(resp.json(), indent=2))
-
-    # check if nodes is connected
-    if len(resp.json()) == 0:
-        print("❌ No nodes in main cluster")
+        print(resp.text)
         raise Exception("Not ready")
 
+    # check if nodes is connected
+    if len(resp.json()) != pool_info.get("config", {}).get("nodes_count"):
+        print("❌ Not enough nodes in main cluster {} != {}".format(len(resp.json()), 
+                                                                    pool_info.get("config", {}).get("nodes_count")))
+
+        # Get freenodes list
+        nodes_url = f"{host}/api/v1/cluster/freenodes"
+        resp = session.get(nodes_url, headers=auth_headers)
+
+        free_nodes = resp.json()
+        print(json.dumps(free_nodes, indent=2))
+
+        for fn in free_nodes:
+            nodes_url = f"{host}/api/v1/cluster/main/nodes/{fn['uid']}"
+            resp = session.post(nodes_url, headers=auth_headers, json={})
+            if resp.status_code in (200, 201):
+                print(f"✅ Added nodes success! Status code: {resp.status_code}")
+
+        raise Exception("Not ready")
 
     # Step 4: Apply YAML
     # generate file
@@ -228,11 +257,9 @@ def mgx_cluster():
     plugins_url = f"{host}/api/v1/cluster/main/plugins"
     with open(GEN_MANIFEST_FILE, "rb") as f:
         files = {"file": (os.path.basename(GEN_MANIFEST_FILE), f, "application/x-yaml")}
-        resp = session.put(plugins_url, headers={"accept": "application/json", "Authorization": f"JWT {access_token}"}, files=files)
+        resp = session.put(plugins_url, headers=auth_headers}, files=files)
     if resp.status_code in (200, 201):
         print(f"✅ YAML apply success! Status code: {resp.status_code}")
-    else:
-        print(f"❌ YAML apply failed! Status code: {resp.status_code}")
 
     try:
         print(json.dumps(resp.json(), indent=2))
