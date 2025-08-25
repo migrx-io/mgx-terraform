@@ -73,16 +73,17 @@ if [ "${CASS_RPC_ADDR}" = "${FIRST_SEED_IP}" ]; then
 	    cqlsh -u cassandra -p cassandra ${CASS_RPC_ADDR} -e "CREATE ROLE ${CASS_USER} WITH PASSWORD = '${CASS_PASSWD}' AND SUPERUSER = true AND LOGIN = true;"
 		
 	    cqlsh -u ${CASS_USER} -p ${CASS_PASSWD} ${CASS_RPC_ADDR} -e "ALTER ROLE cassandra WITH PASSWORD='${CASS_PASSWD}' AND SUPERUSER=false;"
-    fi
 
-    # install schema
-    apt install -t migrx -y mgx-schema
-    cd /opt/mgx-schema
-    cqlsh -u ${CASS_USER} -p ${CASS_PASSWD} ${CASS_RPC_ADDR} -e 'DROP KEYSPACE IF EXISTS dc1;'
-    ${PYENV}/cassandra-migrate -y -m prod -c dc1.yaml -u ${CASS_USER} -P ${CASS_PASSWD} -H ${CASS_RPC_ADDR} migrate
-    apt remove -y mgx-schema
-    cd -
-    rm -rf /opt/mgx-schema
+        # install schema
+        apt install -t migrx -y mgx-schema
+        cd /opt/mgx-schema
+        cqlsh -u ${CASS_USER} -p ${CASS_PASSWD} ${CASS_RPC_ADDR} -e 'DROP KEYSPACE IF EXISTS dc1;'
+        ${PYENV}/cassandra-migrate -y -m prod -c dc1.yaml -u ${CASS_USER} -P ${CASS_PASSWD} -H ${CASS_RPC_ADDR} migrate
+        apt remove -y mgx-schema
+        cd -
+        rm -rf /opt/mgx-schema
+
+    fi
 
 else
     echo "This is not the first seed (${CASS_RPC_ADDR}), skipping auth + replication setup."
