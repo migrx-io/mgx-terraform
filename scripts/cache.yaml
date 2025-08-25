@@ -34,6 +34,7 @@ spec:
   labels: {labels}
   name: {name}
   node_ips: {node_ips}
+  s3_buckets: {s3_buckets}
   disks_count: {nvme_node_disks_count}
   r_cache_size_in_mib: {r_cache_size_in_mib}
   rw_cache_size_in_mib: {rw_cache_size_in_mib}

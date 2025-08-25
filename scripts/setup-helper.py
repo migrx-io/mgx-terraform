@@ -154,6 +154,7 @@ def generate_cache_yaml():
 
     # Add to values
     values["node_ips"] = "[" + ", ".join(f'"{entry}"' for entry in node_entries) + "]"
+    values["s3_buckets"] = values["s3_buckets"]
 
     # Format template
     rendered = template.format(**values)
