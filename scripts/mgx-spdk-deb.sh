@@ -28,3 +28,7 @@ modprobe nbd
 # set huge page
 echo 2048 | tee /proc/sys/vm/nr_hugepages
 mount -t hugetlbfs none /dev/hugepages
+
+# create default dir for cache
+mkdir -p /mnt/s3cache
+chown -R mgx-core:mgx-core /mnt/s3cache
