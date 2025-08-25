@@ -41,8 +41,8 @@ storage_pools = {
     nodes_count           = 3
     nvme_node_disks_count = 1
     max_volumes_count     = 10
-    r_cache_size_in_mib   = 1024
-    rw_cache_size_in_mib  = 2048
+    r_cache_size_in_mib   = 20400
+    rw_cache_size_in_mib  = 10480
     s3_bucket_names       = ["mgxs3storage1"]
     s3_force_destroy      = true
   }
