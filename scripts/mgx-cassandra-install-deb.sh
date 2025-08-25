@@ -38,10 +38,6 @@ sed -i "s/127.0.0.1:7000/${CASS_RPC_ADDR}:7000/g" /etc/cassandra/cassandra.yaml
 sed -i "s/127.0.0.1:7000/${CASS_RPC_ADDR}:7000/g" /etc/cassandra/cassandra.yaml
 sed -i "s/^\(\s*-\s*seeds:\s*\).*/\1\"${CASS_RPC_SEEDS}\"/" /etc/cassandra/cassandra.yaml
 
-# allow replace with same addr
-sed -i '/-Dcassandra\.replace_address=/d' /etc/cassandra/cassandra-env.sh 
-echo "JVM_OPTS=\"\$JVM_OPTS -Dcassandra.allow_unsafe_replace=true -Dcassandra.replace_address=${CASS_RPC_ADDR}\"" >> /etc/cassandra/cassandra-env.sh
-
 systemctl enable cassandra
 systemctl restart cassandra
 
@@ -50,9 +46,6 @@ echo "Waiting for Cassandra to be ready on port 9042..."
 until nc -z ${CASS_RPC_ADDR} 9042; do
     sleep 2
 done
-
-# repair data
-nodetool repair
 
 FIRST_SEED=$(echo "${CASS_RPC_SEEDS}" | cut -d',' -f1)
 FIRST_SEED_IP="${FIRST_SEED%%:*}"
