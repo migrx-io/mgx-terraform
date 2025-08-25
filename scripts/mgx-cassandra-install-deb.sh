@@ -38,6 +38,10 @@ sed -i "s/127.0.0.1:7000/${CASS_RPC_ADDR}:7000/g" /etc/cassandra/cassandra.yaml
 sed -i "s/127.0.0.1:7000/${CASS_RPC_ADDR}:7000/g" /etc/cassandra/cassandra.yaml
 sed -i "s/^\(\s*-\s*seeds:\s*\).*/\1\"${CASS_RPC_SEEDS}\"/" /etc/cassandra/cassandra.yaml
 
+# allow replace with same addr
+sed -i '/-Dcassandra\.replace_address=/d' /etc/cassandra/cassandra-env.sh 
+echo "JVM_OPTS=\"\$JVM_OPTS -Dcassandra.allow_unsafe_replace=true -Dcassandra.replace_address=${CASS_RPC_ADDR}\"" >> /etc/cassandra/cassandra-env.sh
+
 systemctl enable cassandra
 systemctl restart cassandra
 
@@ -47,27 +51,35 @@ until nc -z ${CASS_RPC_ADDR} 9042; do
     sleep 2
 done
 
+# repair data
+nodetool repair
+
 FIRST_SEED=$(echo "${CASS_RPC_SEEDS}" | cut -d',' -f1)
 FIRST_SEED_IP="${FIRST_SEED%%:*}"
 
 if [ "${CASS_RPC_ADDR}" = "${FIRST_SEED_IP}" ]; then
 
-    echo "Waiting for Cassandra to accept auth..."
-    until cqlsh -u cassandra -p cassandra ${CASS_RPC_ADDR} -e "SHOW HOST" >/dev/null 2>&1; do
-        sleep 5
-    done
+    if cqlsh -u "${CASS_USER}" -p "${CASS_PASSWD}" ${CASS_RPC_ADDR} -e "SHOW HOST" >/dev/null 2>&1; then
+    	echo "User ${CASS_USER} already works, skipping bootstrap."
+    else
 
-    cqlsh -u cassandra -p cassandra ${CASS_RPC_ADDR} -e  "ALTER KEYSPACE \"system_auth\" WITH REPLICATION = {'class' : 'NetworkTopologyStrategy', 'dc1' : 3};"
+	    echo "Waiting for Cassandra to accept auth..."
+	    until cqlsh -u cassandra -p cassandra ${CASS_RPC_ADDR} -e "SHOW HOST" >/dev/null 2>&1; do
+		sleep 5
+	    done
 
-    cqlsh -u cassandra -p cassandra ${CASS_RPC_ADDR} -e "CREATE ROLE ${CASS_USER} WITH PASSWORD = '${CASS_PASSWD}' AND SUPERUSER = true AND LOGIN = true;"
-        
-    cqlsh -u ${CASS_USER} -p ${CASS_PASSWD} ${CASS_RPC_ADDR} -e "ALTER ROLE cassandra WITH PASSWORD='${CASS_PASSWD}' AND SUPERUSER=false;"
+	    cqlsh -u cassandra -p cassandra ${CASS_RPC_ADDR} -e  "ALTER KEYSPACE \"system_auth\" WITH REPLICATION = {'class' : 'NetworkTopologyStrategy', 'dc1' : 3};"
+
+	    cqlsh -u cassandra -p cassandra ${CASS_RPC_ADDR} -e "CREATE ROLE ${CASS_USER} WITH PASSWORD = '${CASS_PASSWD}' AND SUPERUSER = true AND LOGIN = true;"
+		
+	    cqlsh -u ${CASS_USER} -p ${CASS_PASSWD} ${CASS_RPC_ADDR} -e "ALTER ROLE cassandra WITH PASSWORD='${CASS_PASSWD}' AND SUPERUSER=false;"
+    fi
 
     # install schema
     apt install -t migrx -y mgx-schema
     cd /opt/mgx-schema
     cqlsh -u ${CASS_USER} -p ${CASS_PASSWD} ${CASS_RPC_ADDR} -e 'DROP KEYSPACE IF EXISTS dc1;'
-    ${PYENV}/cassandra-migrate -y -m dev -c dc1.yaml -u ${CASS_USER} -P ${CASS_PASSWD} -H ${CASS_RPC_ADDR} migrate
+    ${PYENV}/cassandra-migrate -y -m prod -c dc1.yaml -u ${CASS_USER} -P ${CASS_PASSWD} -H ${CASS_RPC_ADDR} migrate
     apt remove -y mgx-schema
     cd -
     rm -rf /opt/mgx-schema
