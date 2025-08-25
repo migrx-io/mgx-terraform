@@ -69,7 +69,7 @@ echo "STEP 3. Configure host.."
 if grep -q mgx-core /etc/sudoers; then
         echo "already configured.."
     else
-        echo "%mgx-core     ALL=(ALL)       NOPASSWD:    /usr/bin/kill, /usr/bin/systemctl, /usr/sbin/arping, /usr/bin/apt, /usr/bin/apt-cache, /usr/sbin/ip" >> /etc/sudoers
+        echo "%mgx-core     ALL=(ALL)       NOPASSWD:    /usr/bin/mount, /usr/bin/umount, /usr/sbin/blkid, /usr/sbin/mkfs.ext4, /usr/sbin/nvme, /usr/bin/kill, /usr/bin/systemctl, /usr/sbin/arping, /usr/bin/apt, /usr/bin/apt-cache, /usr/sbin/ip" >> /etc/sudoers
 
 fi
 
