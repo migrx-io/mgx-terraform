@@ -4,8 +4,6 @@ set -e
 export DEBIAN_FRONTEND=noninteractive
 MGX_VAR_DIR=/var/lib/migrx
 PY=/opt/mgx-pyenv3/bin/python
-MGX_ID=$($PY ./setup-helper.py mgx-id)
-
 # 0. Wait while NAT will be reachable
 
 sleep 30
@@ -24,6 +22,8 @@ done
 sh ./mgx-bootstrap-deb.sh
 
 # 2. Generate mgx-id and mgx-hosts
+MGX_ID=$($PY ./setup-helper.py mgx-id)
+
 echo "${MGX_ID}" > ${MGX_VAR_DIR}/mgx-id
 
 # 3. Set all hosts for pool
