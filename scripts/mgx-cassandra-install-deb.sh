@@ -23,20 +23,6 @@ fi
 rm -rf /var/lib/cassandra/hints/*
 rm -rf /var/lib/cassandra/saved_caches/*
 
-# Only delete non-system keyspaces
-DATA_DIR="/var/lib/cassandra/data"
-for ks in "$DATA_DIR"/*; do
-    case $(basename "$ks") in
-        system* )
-            echo "Skipping system keyspace $(basename "$ks")"
-            ;;
-        * )
-            echo "Deleting keyspace $(basename "$ks")"
-            rm -rf "$ks"
-            ;;
-    esac
-done
-
 echo "STEP 3. Configurate.."
 echo ""
 
