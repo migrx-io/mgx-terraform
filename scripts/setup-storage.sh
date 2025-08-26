@@ -4,6 +4,7 @@ set -e
 export DEBIAN_FRONTEND=noninteractive
 MGX_VAR_DIR=/var/lib/migrx
 PY=/opt/mgx-pyenv3/bin/python
+MGX_ID=$($PY ./setup-helper.py mgx-id)
 
 # 0. Wait while NAT will be reachable
 
@@ -23,7 +24,7 @@ done
 sh ./mgx-bootstrap-deb.sh
 
 # 2. Generate mgx-id and mgx-hosts
-$PY ./setup-helper.py mgx-id > ${MGX_VAR_DIR}/mgx-id
+echo "${MGX_ID}" > ${MGX_VAR_DIR}/mgx-id
 
 # 3. Set all hosts for pool
 $PY ./setup-helper.py mgx-hosts > ${MGX_VAR_DIR}/mgx-hosts
@@ -67,7 +68,10 @@ systemctl restart mgx-spdk-cache
 # 10. Install plugins 
 sh ./mgx-plugins-deb.sh
 
-# 11. Install manifest
+# 11. Set nqn
+echo "nqn.2014-08.org.nvmexpress:uuid:${MGX_ID}" > /etc/nvme/hostnqn
+
+# 12. Install manifest
 $PY ./setup-helper.py mgx-cluster
 
 echo "Storage OK!"
