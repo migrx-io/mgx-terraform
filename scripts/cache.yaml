@@ -22,10 +22,10 @@ spec:
   lvol_r_cache_size_in_mib: {r_cache_size_in_mib}
   lvol_rw_cache_size_in_mib: {rw_cache_size_in_mib}
   nvme_bdev_retry_count: -1
-  nvme_ctrlr_loss_timeout_sec: -1
+  nvme_ctrlr_loss_timeout_sec: 60
   nvme_fast_io_fail_timeout_sec: 30
   raid_bdev_retry_count: -1
-  raid_ctrlr_loss_timeout_sec: -1
+  raid_ctrlr_loss_timeout_sec: 60
   raid_fast_io_fail_timeout_sec: 30
 ---
 apiVersion: v1
