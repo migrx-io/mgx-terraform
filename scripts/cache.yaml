@@ -25,7 +25,7 @@ spec:
   nvme_ctrlr_loss_timeout_sec: 60
   nvme_fast_io_fail_timeout_sec: 30
   raid_bdev_retry_count: -1
-  raid_ctrlr_loss_timeout_sec: 60
+  raid_ctrlr_loss_timeout_sec: -1
   raid_fast_io_fail_timeout_sec: 30
 ---
 apiVersion: v1
