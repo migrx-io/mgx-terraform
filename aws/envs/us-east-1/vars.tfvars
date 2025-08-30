@@ -29,7 +29,7 @@ bastion = {
 mgmt_pool = {
   nodes_ami           = "ami-0f9de6e2d2f067fca"
   nodes_instance_type = "t3a.xlarge"
-  nodes_count         = 1
+  nodes_count         = 0
 }
 
 storage_pools = {
