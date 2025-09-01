@@ -46,7 +46,9 @@ echo "STEP 1. Create DEB repo.."
 echo ""
 
 echo "deb [trusted=yes] https://repo.migrx.io/DEBS/ migrx main" | tee /etc/apt/sources.list.d/migrx.list
-apt-get update     
+
+# retry in case if repo is slow
+for i in 1 2 3; do apt-get update && break || sleep 10; done
 
 echo "STEP 2. Install packages.."
 echo ""
