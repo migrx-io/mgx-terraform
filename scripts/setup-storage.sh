@@ -4,8 +4,9 @@ set -e
 export DEBIAN_FRONTEND=noninteractive
 MGX_VAR_DIR=/var/lib/migrx
 PY=/opt/mgx-pyenv3/bin/python
-# 0. Wait while NAT will be reachable
+MDADM_CONF_FILE="/etc/mdadm/mdadm.conf"
 
+# 0. Wait while NAT will be reachable
 sleep 30
 
 while true; do
@@ -73,5 +74,19 @@ echo "nqn.2014-08.org.nvmexpress:uuid:${MGX_ID}" > /etc/nvme/hostnqn
 
 # 12. Install manifest
 $PY ./setup-helper.py mgx-cluster
+
+# 13. Disable mdadn auto assemble
+# Add AUTO -all if not already present
+if ! grep -q "^AUTO -all" "$MDADM_CONF_FILE"; then
+  echo "AUTO -all" >> "$MDADM_CONF_FILE"
+  echo "'AUTO -all' to $CONF_FILE"
+else
+  echo "'AUTO -all' already present in $CONF_FILE"
+fi
+
+# Regenerate initramfs
+echo "Updating initramfs..."
+update-initramfs -u
+
 
 echo "Storage OK!"
