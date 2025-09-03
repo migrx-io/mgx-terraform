@@ -77,9 +77,9 @@ echo "nqn.2014-08.org.nvmexpress:uuid:${MGX_ID}" > /etc/nvme/hostnqn
 # Add AUTO -all if not already present
 if ! grep -q "^AUTO -all" "$MDADM_CONF_FILE"; then
   echo "AUTO -all" >> "$MDADM_CONF_FILE"
-  echo "'AUTO -all' to $CONF_FILE"
+  echo "'AUTO -all' to $MDADM_CONF_FILE"
 else
-  echo "'AUTO -all' already present in $CONF_FILE"
+  echo "'AUTO -all' already present in $MDADM_CONF_FILE"
 fi
 
 # Regenerate initramfs
