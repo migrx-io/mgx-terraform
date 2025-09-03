@@ -57,7 +57,7 @@ storage_pools = {
     max_volumes_count     = 0
     r_cache_size_in_mib   = 0
     rw_cache_size_in_mib  = 0
-    raid_level            = 1
+    raid_level            = 10
     s3_bucket_names       = []
     s3_force_destroy      = true
   }
