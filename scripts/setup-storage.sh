@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e 
+set -euo pipefail
 
 export DEBIAN_FRONTEND=noninteractive
 MGX_VAR_DIR=/var/lib/migrx
@@ -20,7 +20,7 @@ while true; do
 done
 
 # 1. install mgx-core and etc
-sh ./mgx-bootstrap-deb.sh
+bash -e ./mgx-bootstrap-deb.sh
 
 # 2. Generate mgx-id and mgx-hosts
 MGX_ID=$($PY ./setup-helper.py mgx-id)
@@ -39,10 +39,10 @@ export $(xargs < /etc/mgx-env)
 # 6. Install cassandra
 export CASS_RPC_SEEDS=$($PY ./setup-helper.py mgx-cass-seeds)
 export CASS_NODES_COUNT=$($PY ./setup-helper.py mgx-cass-nodes-count)
-sh ./mgx-cassandra-install-deb.sh
+bash -e ./mgx-cassandra-install-deb.sh
 
 # 8. Install spdk deps
-sh ./mgx-spdk-deb.sh
+bash -e ./mgx-spdk-deb.sh
 cp ./mgx-spdk /etc/mgx-spdk
 cp ./mgx-spdk-cache /etc/mgx-spdk-cache
 
@@ -68,7 +68,7 @@ systemctl restart mgx-spdk
 systemctl restart mgx-spdk-cache
 
 # 10. Install plugins 
-sh ./mgx-plugins-deb.sh
+bash -e ./mgx-plugins-deb.sh
 
 # 11. Set nqn
 echo "nqn.2014-08.org.nvmexpress:uuid:${MGX_ID}" > /etc/nvme/hostnqn
