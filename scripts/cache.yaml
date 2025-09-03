@@ -27,7 +27,7 @@ spec:
   raid_bdev_retry_count: -1
   raid_ctrlr_loss_timeout_sec: 60
   raid_fast_io_fail_timeout_sec: 30
-  raid_lebel: 1
+  raid_level: {raid_level}
 ---
 apiVersion: v1
 kind: api

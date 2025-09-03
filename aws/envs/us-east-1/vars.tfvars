@@ -43,6 +43,7 @@ storage_pools = {
     max_volumes_count     = 10
     r_cache_size_in_mib   = 20400
     rw_cache_size_in_mib  = 10480
+    raid_level            = 1
     s3_bucket_names       = ["mgxs3storage1"]
     s3_force_destroy      = true
   }
@@ -56,6 +57,7 @@ storage_pools = {
     max_volumes_count     = 0
     r_cache_size_in_mib   = 0
     rw_cache_size_in_mib  = 0
+    raid_level            = 1
     s3_bucket_names       = []
     s3_force_destroy      = true
   }
