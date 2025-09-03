@@ -72,10 +72,7 @@ sh ./mgx-plugins-deb.sh
 # 11. Set nqn
 echo "nqn.2014-08.org.nvmexpress:uuid:${MGX_ID}" > /etc/nvme/hostnqn
 
-# 12. Install manifest
-$PY ./setup-helper.py mgx-cluster
-
-# 13. Disable mdadn auto assemble
+# 12. Disable mdadn auto assemble
 # Add AUTO -all if not already present
 if ! grep -q "^AUTO -all" "$MDADM_CONF_FILE"; then
   echo "AUTO -all" >> "$MDADM_CONF_FILE"
@@ -88,5 +85,7 @@ fi
 echo "Updating initramfs..."
 update-initramfs -u
 
+# 13. Install manifest
+$PY ./setup-helper.py mgx-cluster
 
 echo "Storage OK!"
