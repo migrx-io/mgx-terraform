@@ -19,10 +19,10 @@ systemctl stop cassandra
 # clear data if exists
 rm -rf /var/lib/cassandra/commitlog/*
 
-# CURRENT_CLUSTER=$(grep -E '^cluster_name:' /etc/cassandra/cassandra.yaml | awk -F': ' '{print $2}' | tr -d '"')
-# if [ "$CURRENT_CLUSTER" != "Migrx" ]; then
-rm -rf /var/lib/cassandra/data/*
-# fi
+CURRENT_CLUSTER=$(grep -E '^cluster_name:' /etc/cassandra/cassandra.yaml | awk -F': ' '{print $2}' | tr -d '"')
+if [ "$CURRENT_CLUSTER" != "Migrx" ]; then
+    rm -rf /var/lib/cassandra/data/*
+fi
 
 rm -rf /var/lib/cassandra/hints/*
 rm -rf /var/lib/cassandra/saved_caches/*
