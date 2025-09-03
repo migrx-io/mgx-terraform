@@ -38,6 +38,7 @@ export $(xargs < /etc/mgx-env)
 
 # 6. Install cassandra
 export CASS_RPC_SEEDS=$($PY ./setup-helper.py mgx-cass-seeds)
+export CASS_NODES_COUNT=$($PY ./setup-helper.py mgx-cass-nodes-count)
 sh ./mgx-cassandra-install-deb.sh
 
 # 8. Install spdk deps

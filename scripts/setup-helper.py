@@ -128,6 +128,14 @@ def mgx_cass_seeds():
     print(seeds_value)
 
 
+def mgx_cass_nodes_count():
+    # Read the first two IPs from MGMT_IPS_FILE
+    with open(MGMT_IPS_FILE, "r") as f:
+        mgmt_ips = [line.strip() for line in f if line.strip()]
+
+    print(len(mgmt_ips))
+
+
 def generate_cache_yaml():
 
     # Load pool info JSON
@@ -301,6 +309,8 @@ if __name__ == "__main__":
             mgx_env()
         elif op == "mgx-cass-seeds":
             mgx_cass_seeds()
+        elif op == "mgx-cass-nodes-count":
+            mgx_cass_nodes_count()
         elif op == "mgx-cluster":
             mgx_cluster_wait()
 

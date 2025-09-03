@@ -54,22 +54,24 @@ done
 
 FIRST_SEED=$(echo "${CASS_RPC_SEEDS}" | cut -d',' -f1)
 FIRST_SEED_IP="${FIRST_SEED%%:*}"
-TARGET=3
+TARGET=${CASS_NODES_COUNT}
+
+# wait all nodes is up before run
+while true; do
+    cnt=$(nodetool status | grep '^UN' | wc -l)
+    if [ "$cnt" -ge "$TARGET" ]; then
+        echo "✅ $cnt nodes are up."
+        break
+    else
+        echo "Currently $cnt nodes up. Waiting..."
+        sleep 5
+    fi
+done
+ 
 
 if [ "${CASS_RPC_ADDR}" = "${FIRST_SEED_IP}" ]; then
 
-    # wait 3 nodes is up before run
-    while true; do
-        cnt=$(nodetool status | grep '^UN' | wc -l)
-        if [ "$cnt" -ge "$TARGET" ]; then
-            echo "✅ $cnt nodes are up."
-            break
-        else
-            echo "Currently $cnt nodes up. Waiting..."
-            sleep 5
-        fi
-    done
-    
+   
     if cqlsh -u "${CASS_USER}" -p "${CASS_PASSWD}" ${CASS_RPC_ADDR} -e "SHOW HOST" >/dev/null 2>&1; then
     	echo "User ${CASS_USER} already works, skipping bootstrap."
     else
