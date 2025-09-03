@@ -123,7 +123,7 @@ def mgx_cass_seeds():
         mgmt_ips = [line.strip() for line in f if line.strip()]
 
     # Prepare seeds string
-    seeds_value = f'{mgmt_ips[0]}:7000,{mgmt_ips[1]}:7000'
+    seeds_value = ",".join(f"{ip}" for ip in mgmt_ips)
 
     print(seeds_value)
 
