@@ -37,9 +37,9 @@ storage_pools = {
     description           = "Test pool1"
     labels                = "name=pool-1,env=dev"
     nodes_ami             = "ami-0f9de6e2d2f067fca"
-    nodes_instance_type   = "c5ad.4xlarge"
+    nodes_instance_type   = "c5ad.2xlarge"
     nodes_count           = 3
-    nvme_node_disks_count = 2
+    nvme_node_disks_count = 1
     max_volumes_count     = 10
     r_cache_size_in_mib   = 20400
     rw_cache_size_in_mib  = 10480
