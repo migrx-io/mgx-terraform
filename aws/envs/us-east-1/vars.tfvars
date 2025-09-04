@@ -37,13 +37,13 @@ storage_pools = {
     description           = "Test pool1"
     labels                = "name=pool-1,env=dev"
     nodes_ami             = "ami-0f9de6e2d2f067fca"
-    nodes_instance_type   = "c5ad.2xlarge"
-    nodes_count           = 4
-    nvme_node_disks_count = 1
+    nodes_instance_type   = "c5ad.4xlarge"
+    nodes_count           = 3
+    nvme_node_disks_count = 2
     max_volumes_count     = 10
     r_cache_size_in_mib   = 20400
     rw_cache_size_in_mib  = 10480
-    raid_level            = 10
+    raid_level            = 1
     s3_bucket_names       = ["mgxs3storage1"]
     s3_force_destroy      = true
   }
@@ -51,7 +51,7 @@ storage_pools = {
     description           = "Test pool2"
     labels                = "name=pool-2,env=dev"
     nodes_ami             = "ami-0f9de6e2d2f067fca"
-    nodes_instance_type   = "c5ad.2xlarge"
+    nodes_instance_type   = "c5ad.4xlarge"
     nodes_count           = 0
     nvme_node_disks_count = 0
     max_volumes_count     = 0
