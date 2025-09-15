@@ -15,6 +15,8 @@ ENVS_FILE = "./mgx-env"
 MERGED_ENV_FILE = "/etc/mgx-env"
 MANIFEST_FILE = "./cache.yaml"
 GEN_MANIFEST_FILE = "./gen_cache.yaml"
+MANIFEST_FILE_S = "./storage.yaml"
+GEN_MANIFEST_FILE_S = "./gen_stotage.yaml"
 POOL_INFO_FILE= "../pool_info.json"
 
 
@@ -146,6 +148,10 @@ def generate_cache_yaml():
     with open(MANIFEST_FILE, "r") as f:
         template = f.read()
 
+    # Load storage template
+    with open(MANIFEST_FILE_S, "r") as f:
+        template_s = f.read()
+
     # Prepare values
     values = d["config"]
     values["name"] = d["pool_name"]
@@ -167,9 +173,15 @@ def generate_cache_yaml():
     # Format template
     rendered = template.format(**values)
 
+    # generate default config for volumes
+    rendered_s = template_s.format(**{"s3_bucket_name": values["s3_buckets"][0]})
+
     # Save next to cache.yaml
     with open(GEN_MANIFEST_FILE, "w") as f:
         f.write(rendered)
+
+    with open(GEN_MANIFEST_FILE_S, "w") as f:
+        f.write(rendered_s)
 
 
 def mgx_cluster_wait():
@@ -275,6 +287,7 @@ def mgx_cluster():
     generate_cache_yaml()
 
     plugins_url = f"{host}/api/v1/cluster/main/plugins"
+
     with open(GEN_MANIFEST_FILE, "rb") as f:
         files = {"file": (os.path.basename(GEN_MANIFEST_FILE), f, "application/x-yaml")}
         resp = session.put(plugins_url, headers=auth_headers, files=files)
@@ -294,6 +307,26 @@ def mgx_cluster():
     except Exception:
         print(resp.text)
         raise Exception("Not ready")
+
+    # put storage manifest
+    with open(GEN_MANIFEST_FILE_S, "rb") as f:
+        files = {"file": (os.path.basename(GEN_MANIFEST_FILE_S), f, "application/x-yaml")}
+        resp = session.put(plugins_url, headers=auth_headers, files=files)
+    if resp.status_code in (200, 201):
+        print(f"✅ YAML apply success! Status code: {resp.status_code}")
+
+    try:
+        print(json.dumps(resp.json(), indent=2))
+
+        # check if resource applied
+        for r in resp.json():
+            if r["text"] != "Object already exists":
+                raise Exception("Not ready")
+
+    except Exception:
+        print(resp.text)
+        raise Exception("Not ready")
+
 
 if __name__ == "__main__":
         
