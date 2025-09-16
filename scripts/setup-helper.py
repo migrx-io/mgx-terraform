@@ -12,6 +12,7 @@ DATA_IPS_FILE = "../storage_data_ips.txt"
 MGMT_IPS_FILE = "../storage_mgmt_ips.txt"
 SECRETS_FILE = "../secrets.env"
 ENVS_FILE = "./mgx-env"
+SPDK_ENV = "./mgx-spdk"
 MERGED_ENV_FILE = "/etc/mgx-env"
 MANIFEST_FILE = "./cache.yaml"
 GEN_MANIFEST_FILE = "./gen_cache.yaml"
@@ -136,6 +137,23 @@ def mgx_cass_nodes_count():
         mgmt_ips = [line.strip() for line in f if line.strip()]
 
     print(len(mgmt_ips))
+
+
+def mgx_spdk():
+
+    # Load pool info JSON
+    d = {}
+    with open(POOL_INFO_FILE, "r") as f:
+        d = json.load(f)
+
+    with open(SPDK_ENV, "r") as f:
+        data = f.read()
+
+    # Replace placeholders in data
+    data = data.replace("<region>", d["region"])
+    data = data.replace("<pool>", d["pool_name"])
+
+    print(data)
 
 
 def generate_cache_yaml():
@@ -340,6 +358,8 @@ if __name__ == "__main__":
             mgx_hosts()
         elif op == "mgx-env":
             mgx_env()
+        elif op == "mgx-spdk":
+            mgx_spdk()
         elif op == "mgx-cass-seeds":
             mgx_cass_seeds()
         elif op == "mgx-cass-nodes-count":

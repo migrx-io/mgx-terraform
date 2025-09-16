@@ -109,6 +109,7 @@ resource "null_resource" "provision_storage" {
 
   cat > /tmp/mgx-scripts/pool_info.json <<'EOF'
   ${jsonencode({
+      region    = var.region,
       pool_name = split("-", each.key)[0],
       config    = var.storage_pools[split("-", each.key)[0]]
 })}

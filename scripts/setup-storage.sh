@@ -43,7 +43,7 @@ bash -e ./mgx-cassandra-install-deb.sh
 
 # 8. Install spdk deps
 bash -e ./mgx-spdk-deb.sh
-cp ./mgx-spdk /etc/mgx-spdk
+$PY ./setup-helper.py mgx-spdk > /etc/mgx-spdk
 cp ./mgx-spdk-cache /etc/mgx-spdk-cache
 
 # 9. Start services

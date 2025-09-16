@@ -15,8 +15,8 @@ MGX_S3BACKER_ARGS="\
     --nbd-param=cache-high-threshold=95 \
     --nbd-param=cache-low-threshold=80 \
     --nbd-param=cache-on-read=true \
-    --region=us-east-1 \
-    --accessEC2IAM=ec2-s3-<bucket>-access-role \
+    --region=<region> \
+    --accessEC2IAM=storage-<pool>-full-access-role \
     --force \
     --debug \
     --debug-http \
