@@ -7,6 +7,5 @@ metadata:
 spec:
   name: default
   storage_bucket: {s3_bucket_name}
-  storage_default_vol_size: 10240
   cache_r_cache_size: 4096
   cache_rw_cache_size: 1024
