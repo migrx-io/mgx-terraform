@@ -18,8 +18,8 @@ metadata:
       config: add
 spec:
   bucket_selector: {s3_bucket_name}
-  default: yes
-  enabled: yes
+  default: "yes"
+  enabled: "yes"
   labels: "default=yes"
   name: default
   node_selector: null
