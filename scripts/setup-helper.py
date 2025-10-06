@@ -210,7 +210,7 @@ def mgx_cluster_wait():
             return 
 
         except Exception as e:
-            print(f"❌ mgx-cluster failed: {e}")
+            print(f"mgx-cluster failed: {e}")
             time.sleep(5)
 
 
