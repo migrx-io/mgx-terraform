@@ -366,6 +366,12 @@ resource "aws_instance" "mgmt_node" {
     network_interface_id = aws_network_interface.mgmt_primary[each.key].id
   }
 
+  root_block_device {
+    volume_size = 30
+    volume_type = "gp3"
+    delete_on_termination = true
+  }
+
   tags = {
     Name    = "mgmt-node-${each.value.index}"
     Service = "mgx-storage"
@@ -400,6 +406,12 @@ resource "aws_instance" "storage_node" {
   network_interface {
     device_index         = 1
     network_interface_id = aws_network_interface.storage_secondary[each.key].id
+  }
+
+  root_block_device {
+    volume_size = 30
+    volume_type = "gp3"
+    delete_on_termination = true
   }
 
   tags = {
