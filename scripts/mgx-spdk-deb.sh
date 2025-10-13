@@ -31,4 +31,7 @@ mount -t hugetlbfs none /dev/hugepages
 
 # create default dir for cache
 mkdir -p /mnt/s3cache
+mkdir -p /var/s3cache/secrets
+
 chown -R mgx-core:mgx-core /mnt/s3cache
+chown -R mgx-core:mgx-core /var/s3cache/secrets
