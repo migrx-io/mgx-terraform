@@ -2,20 +2,14 @@ region = "us-east-1"
 
 vpc_id = "vpc-095dc0635c6244fe3"
 
-azs = ["us-east-1a",
-  "us-east-1b",
-"us-east-1c"]
+azs = ["us-east-1a"]
 
 mgmt_subnet_cidrs = [
   "172.31.96.0/20",  # us-east-1a primary
-  "172.31.112.0/20", # us-east-1b primary
-  "172.31.128.0/20"  # us-east-1c primary
 ]
 
 storage_subnet_cidrs = [
   "172.31.144.0/20", # us-east-1a secondary
-  "172.31.160.0/20", # us-east-1b secondary
-  "172.31.176.0/20"  # us-east-1c secondary
 ]
 
 bastion = {
