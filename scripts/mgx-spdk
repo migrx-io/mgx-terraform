@@ -18,8 +18,6 @@ MGX_S3BACKER_ARGS="\
     --region=<region> \
     --accessEC2IAM=storage-<pool>-full-access-role \
     --force \
-    --debug \
-    --debug-http \
     --blockSize=1M \
     --blockCacheThreads=30 \
     --listBlocksThreads=20 \
