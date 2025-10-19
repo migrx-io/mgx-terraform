@@ -162,7 +162,7 @@ def is_metrics_enabled():
     with open(POOL_INFO_FILE, "r") as f:
         d = json.load(f)
 
-    print(d.get("enable_metrics"))
+    print(d.get("config", {}).get("enable_metrics"))
 
 
 def is_grafana_enabled():
@@ -171,7 +171,7 @@ def is_grafana_enabled():
     with open(POOL_INFO_FILE, "r") as f:
         d = json.load(f)
 
-    return d.get("enable_grafana")
+    return d.get("config", {}).get("enable_grafana")
 
 def generate_cache_yaml():
 
@@ -364,11 +364,11 @@ def mgx_cluster():
 
 
     # if enable_grafana is False then return
-    if is_grafana_enabled() is False:
+    if is_grafana_enabled() is not True:
         return
 
     # put systemd manifest
-    with open(g, "rb") as f:
+    with open(MANIFEST_FILE_SRV, "rb") as f:
         files = {"file": (os.path.basename(MANIFEST_FILE_SRV), f, "application/x-yaml")}
         resp = session.put(plugins_url, headers=auth_headers, files=files)
     if resp.status_code in (200, 201):
