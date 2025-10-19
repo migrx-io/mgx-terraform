@@ -73,6 +73,15 @@ bash -e ./mgx-plugins-deb.sh
 # Enable metrics
 IS_METRICS=$($PY ./setup-helper.py is_metrics_enabled)
 if [ "$IS_METRICS" = "True" ]; then
+    # update peers to scrape
+
+    IPS=$CASS_RPC_SEEDS
+
+    for port in 9100 8082; do
+        REPLACEMENT="targets: [$(echo $IPS | sed "s/,/:$port', '/g" | sed "s/^/'/;s/$/:$port'/")]"
+        sed -i "s|targets: \['localhost:$port'\]|$REPLACEMENT|"  /opt/mgx-metrics/prometheus/prometheus.yml
+    done
+
     systemctl enable node_exporter
     systemctl enable prometheus
     systemctl restart node_exporter
