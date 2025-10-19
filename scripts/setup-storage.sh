@@ -72,7 +72,7 @@ bash -e ./mgx-plugins-deb.sh
 
 # Enable metrics
 IS_METRICS=$($PY ./setup-helper.py is_metrics_enabled)
-if [ "$IS_METRICS" = "true" ]; then
+if [ "$IS_METRICS" = "True" ]; then
     systemctl enable node_exporter
     systemctl enable prometheus
     systemctl restart node_exporter
