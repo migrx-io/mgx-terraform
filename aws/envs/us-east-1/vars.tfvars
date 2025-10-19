@@ -40,6 +40,8 @@ storage_pools = {
     raid_level            = 1
     s3_bucket_names       = ["mgxs3storage1"]
     s3_force_destroy      = true
+    enable_metrics        = true
+    enable_grafana        = true
   }
   pool2 = {
     description           = "Test pool2"
@@ -54,5 +56,7 @@ storage_pools = {
     raid_level            = 1
     s3_bucket_names       = []
     s3_force_destroy      = true
+    enable_metrics        = false
+    enable_grafana        = false
   }
 }

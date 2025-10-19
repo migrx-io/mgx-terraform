@@ -19,7 +19,7 @@ GEN_MANIFEST_FILE = "./gen_cache.yaml"
 MANIFEST_FILE_S = "./storage.yaml"
 GEN_MANIFEST_FILE_S = "./gen_stotage.yaml"
 POOL_INFO_FILE= "../pool_info.json"
-
+MANIFEST_FILE_SRV = "./systemd.yaml"
 
 # Collect all IPv4 addresses from all interfaces
 def get_all_ips():
@@ -155,6 +155,23 @@ def mgx_spdk():
 
     print(data)
 
+def is_metrics_enabled():
+
+    # Load pool info JSON
+    d = {}
+    with open(POOL_INFO_FILE, "r") as f:
+        d = json.load(f)
+
+    print(d.get("enable_metrics"))
+
+
+def is_grafana_enabled():
+
+    d = {}
+    with open(POOL_INFO_FILE, "r") as f:
+        d = json.load(f)
+
+    return d.get("enable_grafana")
 
 def generate_cache_yaml():
 
@@ -346,6 +363,30 @@ def mgx_cluster():
         raise Exception("Not ready")
 
 
+    # if enable_grafana is False then return
+    if is_grafana_enabled() is False:
+        return
+
+    # put systemd manifest
+    with open(g, "rb") as f:
+        files = {"file": (os.path.basename(MANIFEST_FILE_SRV), f, "application/x-yaml")}
+        resp = session.put(plugins_url, headers=auth_headers, files=files)
+    if resp.status_code in (200, 201):
+        print(f"✅ YAML apply success! Status code: {resp.status_code}")
+
+    try:
+        print(json.dumps(resp.json(), indent=2))
+
+        # check if resource applied
+        for r in resp.json():
+            if r["text"] != "Object already exists":
+                raise Exception("Not ready")
+
+    except Exception:
+        print(resp.text)
+        raise Exception("Not ready")
+
+
 if __name__ == "__main__":
         
     op = sys.argv[1]
@@ -366,6 +407,8 @@ if __name__ == "__main__":
             mgx_cass_nodes_count()
         elif op == "mgx-cluster":
             mgx_cluster_wait()
+        elif op == "is_metrics_enabled":
+            is_metrics_enabled()
 
     except Exception as e:
         print(f"ERROR: {e}", file=sys.stderr)

@@ -70,6 +70,18 @@ systemctl restart mgx-spdk-cache
 # 10. Install plugins 
 bash -e ./mgx-plugins-deb.sh
 
+# Enable metrics
+IS_METRICS=$($PY ./setup-helper.py is_metrics_enabled)
+if [ "$IS_METRICS" = "true" ]; then
+    systemctl enable node_exporter
+    systemctl enable prometheus
+    systemctl restart node_exporter
+    systemctl restart prometheus
+else
+    echo "Metrics are disabled"
+fi
+
+
 # 11. Set nqn
 echo "nqn.2014-08.org.nvmexpress:uuid:${MGX_ID}" > /etc/nvme/hostnqn
 
