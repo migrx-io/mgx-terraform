@@ -142,3 +142,9 @@ aws/
     ```
     ssh -A ubuntu@<storage_node_private_ip>
     ```
+
+7. SSH local port forwarding to grafana
+
+```
+ssh -L 127.0.0.1:3000:<storage_node_private_ip>:3000 ubuntu@<bastion_public_ip> -N
+```
