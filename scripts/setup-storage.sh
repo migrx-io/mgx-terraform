@@ -71,7 +71,7 @@ systemctl restart mgx-spdk-cache
 bash -e ./mgx-plugins-deb.sh
 
 # Enable metrics
-IS_METRICS=$($PY ./setup-helper.py is_metrics_enabled)
+IS_METRICS=$($PY ./setup-helper.py is-metrics-enabled)
 if [ "$IS_METRICS" = "True" ]; then
     # update peers to scrape
 

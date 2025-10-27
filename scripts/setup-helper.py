@@ -407,7 +407,7 @@ if __name__ == "__main__":
             mgx_cass_nodes_count()
         elif op == "mgx-cluster":
             mgx_cluster_wait()
-        elif op == "is_metrics_enabled":
+        elif op == "is-metrics-enabled":
             is_metrics_enabled()
 
     except Exception as e:
