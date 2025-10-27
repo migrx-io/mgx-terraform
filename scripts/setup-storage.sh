@@ -42,6 +42,7 @@ export CASS_NODES_COUNT=$($PY ./setup-helper.py mgx-cass-nodes-count)
 bash -e ./mgx-cassandra-install-deb.sh
 
 # 8. Install spdk deps
+export NBDS_MAX=$($PY ./setup-helper.py mgx-storage-vol-count)
 bash -e ./mgx-spdk-deb.sh
 $PY ./setup-helper.py mgx-spdk > /etc/mgx-spdk
 cp ./mgx-spdk-cache /etc/mgx-spdk-cache

@@ -139,6 +139,16 @@ def mgx_cass_nodes_count():
     print(len(mgmt_ips))
 
 
+def mgx_storage_vol_count():
+
+    # Load pool info JSON
+    d = {}
+    with open(POOL_INFO_FILE, "r") as f:
+        d = json.load(f)
+
+    print(d.get("config", {}).get("max_volumes_count", 16))
+
+
 def mgx_spdk():
 
     # Load pool info JSON
@@ -405,6 +415,8 @@ if __name__ == "__main__":
             mgx_cass_seeds()
         elif op == "mgx-cass-nodes-count":
             mgx_cass_nodes_count()
+        elif op == "mgx-storage-vol-count":
+            mgx_storage_vol_count()
         elif op == "mgx-cluster":
             mgx_cluster_wait()
         elif op == "is-metrics-enabled":
