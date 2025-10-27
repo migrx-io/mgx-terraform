@@ -24,6 +24,7 @@ apt-get install -t migrx -y mgx-spdk
 # load nbd module
 echo "nbd" | sudo tee -a /etc/modules
 modprobe nbd
+modprobe nbd nbds_max=${NBDS_MAX} max_part=0
 echo "options nbd nbds_max=${NBDS_MAX} max_part=0" | sudo tee /etc/modprobe.d/nbd.conf
 
 # set huge page
