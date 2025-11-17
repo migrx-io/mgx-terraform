@@ -38,7 +38,7 @@ metadata:
 spec:
   config: {name}
   descr: {description}
-  labels: {labels}
+  labels: "storage=mgx,{labels}"
   name: {name}
   node_ips: {node_ips}
   s3_buckets: {s3_bucket_names}
