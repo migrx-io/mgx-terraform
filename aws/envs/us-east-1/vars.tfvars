@@ -28,8 +28,8 @@ mgmt_pool = {
 
 #
 # How to calculate ther rw/r cache size
-# RW cache = Disk size in GiB * 1024 * 0.05 * Number of nodes
-# R cache = (Disk size in GiB * 1024) - 1024 - RW cache
+# RW cache = Disk size in GiB * 1024 * 0.05 
+# R cache = (Disk size in GiB * 1024) - 1024 - RW cache * Number of nodes
 # 
 
 storage_pools = {
@@ -42,7 +42,7 @@ storage_pools = {
     nvme_node_disks_count = 1
     max_volumes_count     = 10
     r_cache_size_in_mib   = 260096
-    rw_cache_size_in_mib  = 46080
+    rw_cache_size_in_mib  = 15360
     raid_level            = 1
     s3_bucket_names       = ["mgxs3storage1"]
     s3_force_destroy      = true
