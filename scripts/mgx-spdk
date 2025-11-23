@@ -19,19 +19,22 @@ MGX_S3BACKER_ARGS="\
     --accessEC2IAM=storage-<pool>-full-access-role \
     --force \
     --blockSize=1M \
-    --blockCacheThreads=30 \
+    --blockCacheThreads=50 \
     --listBlocksThreads=20 \
     --listBlocks \
     --prefix=<volume>/ \
     --blockHashPrefix \
-    --minWriteDelay=5000 \
-    --md5CacheTime=60000 \
+    --minWriteDelay=0 \
+    --md5CacheTime=0 \
+    --md5CacheSize=0 \
     --blockCacheFile=<rwdiskpath>/<volume>/data \
     --blockCacheRecoverDirtyBlocks \
-    --blockCacheTimeout=30000 \
-    --blockCacheWriteDelay=15000 \
-    --initialRetryPause=5000 \
-    --maxRetryPause=60000 \
+    --blockCacheTimeout=0 \
+    --blockCacheWriteDelay=3000 \
+    --initialRetryPause=200 \
+    --maxRetryPause=10000 \
+    --readAhead=0 \
+    --readAheadTrigger=0 \
     --statsFileMirror=<rwdiskpath>/<volume>/stats \
     --statsFileMirrorInterval=1000 \
     --directIO \
