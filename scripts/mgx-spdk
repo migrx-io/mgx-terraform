@@ -10,7 +10,7 @@ MGX_S3BACKER_WAIT_SEC=2
 MGX_S3BACKER_ARGS="\
     --nbd \
     --nbd-flag=--filter=cache \
-    --nbd-param=cache=writethrough \
+    --nbd-param=cache=writeback \
     --nbd-param=cache-min-block-size=4096 \
     --nbd-param=cache-high-threshold=95 \
     --nbd-param=cache-low-threshold=80 \
