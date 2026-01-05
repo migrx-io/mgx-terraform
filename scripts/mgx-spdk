@@ -22,14 +22,13 @@ MGX_S3BACKER_ARGS="\
     --accessEC2IAM=storage-<pool>-full-access-role \
     --force \
     --blockSize=1M \
-    --blockCacheSize=0 \
-    --blockCacheThreads=0 \
+    --blockCacheSize=200 \
     --blockCacheThreads=30 \
     --listBlocksThreads=30 \
     --listBlocks \
     --prefix=<volume>/ \
     --blockHashPrefix \
-    --blockCacheWriteDelay=0 \
+    --blockCacheWriteDelay=1000 \
     --initialRetryPause=200 \
     --maxRetryPause=3000 \
     --statsFileMirror=<rwdiskpath>/<volume>/stats \
