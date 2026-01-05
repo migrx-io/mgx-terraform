@@ -9,8 +9,11 @@ MGX_S3BACKER_NBD_MAX_SEC_KB="1024"
 MGX_S3BACKER_WAIT_SEC=2
 MGX_S3BACKER_ARGS="\
     --nbd \
+    --nbd-flag=--threads=16 \
     --nbd-flag=--filter=cache \
     --nbd-param=cache=writethrough \
+    --nbd-param=cache-write-file=<rwdiskpath>/<volume>/data \
+    --nbd-param=cache-write-flush-interval=300 \
     --nbd-param=cache-min-block-size=4096 \
     --nbd-param=cache-high-threshold=95 \
     --nbd-param=cache-low-threshold=80 \
@@ -19,22 +22,16 @@ MGX_S3BACKER_ARGS="\
     --accessEC2IAM=storage-<pool>-full-access-role \
     --force \
     --blockSize=1M \
-    --blockCacheThreads=50 \
-    --listBlocksThreads=20 \
+    --blockCacheSize=0 \
+    --blockCacheThreads=0 \
+    --blockCacheThreads=30 \
+    --listBlocksThreads=30 \
     --listBlocks \
     --prefix=<volume>/ \
     --blockHashPrefix \
-    --minWriteDelay=0 \
-    --md5CacheTime=0 \
-    --md5CacheSize=0 \
-    --blockCacheFile=<rwdiskpath>/<volume>/data \
-    --blockCacheRecoverDirtyBlocks \
-    --blockCacheTimeout=0 \
-    --blockCacheWriteDelay=3000 \
+    --blockCacheWriteDelay=0 \
     --initialRetryPause=200 \
-    --maxRetryPause=10000 \
-    --readAhead=0 \
-    --readAheadTrigger=0 \
+    --maxRetryPause=3000 \
     --statsFileMirror=<rwdiskpath>/<volume>/stats \
     --statsFileMirrorInterval=1000 \
     --directIO \
