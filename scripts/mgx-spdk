@@ -9,11 +9,12 @@ MGX_S3BACKER_NBD_MAX_SEC_KB="1024"
 MGX_S3BACKER_WAIT_SEC=2
 MGX_S3BACKER_ARGS="\
     --nbd \
-    --nbd-flag=--threads=16 \
+    --nbd-flag=--threads=20 \
     --nbd-flag=--filter=cache \
     --nbd-param=cache=writethrough \
     --nbd-param=cache-write-file=<rwdiskpath>/<volume>/data \
     --nbd-param=cache-write-flush-interval=300 \
+    --nbd-param=cache-write-flush-blocks=30 \
     --nbd-param=cache-file=<rdiskpath>/<volume>/data \
     --nbd-param=cache-min-block-size=4096 \
     --nbd-param=cache-high-threshold=95 \
@@ -23,7 +24,7 @@ MGX_S3BACKER_ARGS="\
     --accessEC2IAM=storage-<pool>-full-access-role \
     --force \
     --blockSize=1M \
-    --blockCacheSize=300 \
+    --blockCacheSize=500 \
     --blockCacheThreads=30 \
     --listBlocksThreads=30 \
     --listBlocks \
