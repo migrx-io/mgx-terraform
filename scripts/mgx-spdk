@@ -6,6 +6,8 @@ MGX_MAINCORE="2"
 MGX_SOCKET="/var/tmp/spdk_app.sock"
 MGX_UNIX_SOCK_USER="mgx-core"
 MGX_S3BACKER_NBD_MAX_SEC_KB="1024"
+MGX_CGROUP_MAX="1024M"
+MGX_CGROUP_LOW="500M"
 MGX_S3BACKER_WAIT_SEC=2
 MGX_S3BACKER_ARGS="\
     --nbd \
@@ -24,9 +26,9 @@ MGX_S3BACKER_ARGS="\
     --accessEC2IAM=storage-<pool>-full-access-role \
     --force \
     --blockSize=1M \
-    --blockCacheSize=500 \
-    --blockCacheThreads=30 \
-    --listBlocksThreads=30 \
+    --blockCacheSize=300 \
+    --blockCacheThreads=20 \
+    --listBlocksThreads=20 \
     --listBlocks \
     --prefix=<volume>/ \
     --blockHashPrefix \
@@ -34,10 +36,9 @@ MGX_S3BACKER_ARGS="\
     --initialRetryPause=300 \
     --maxRetryPause=3000 \
     --cacheWriteFile=<rwdiskpath>/<volume>/data \
+    --cacheFlushMaxBlocks=30 \
     --cacheReadFile=<rdiskpath>/<volume>/data \
     --statsFileMirror=<rwdiskpath>/<volume>/stats \
     --statsFileMirrorInterval=1000 \
     --directIO \
-    --debug \
-    --debug-http \
     --timeout=30"
