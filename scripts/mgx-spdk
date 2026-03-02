@@ -27,8 +27,8 @@ MGX_S3BACKER_ARGS="\
     --force \
     --blockSize=1M \
     --blockCacheSize=300 \
-    --blockCacheThreads=20 \
-    --listBlocksThreads=20 \
+    --blockCacheThreads=30 \
+    --listBlocksThreads=30 \
     --listBlocks \
     --prefix=<volume>/ \
     --blockHashPrefix \
