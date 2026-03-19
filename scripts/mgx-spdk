@@ -28,8 +28,6 @@ MGX_S3BACKER_ARGS="\
     --blockSize=1M \
     --blockCacheSize=300 \
     --blockCacheThreads=20 \
-    --listBlocksThreads=20 \
-    --listBlocks \
     --prefix=<volume>/ \
     --blockHashPrefix \
     --blockCacheWriteDelay=0 \
