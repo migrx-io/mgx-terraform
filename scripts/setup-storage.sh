@@ -113,9 +113,12 @@ else
   echo "'AUTO -all' already present in $MDADM_CONF_FILE"
 fi
 
+echo "Updating kernel module dependencies..."
+depmod -a
+
 # Regenerate initramfs
 echo "Updating initramfs..."
-update-initramfs -u
+update-initramfs -u -k all
 
 # 13. Install manifest
 $PY ./setup-helper.py mgx-cluster
