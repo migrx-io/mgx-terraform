@@ -83,6 +83,14 @@ if [ "$IS_METRICS" = "True" ]; then
         sed -i "s|targets: \['localhost:$port'\]|$REPLACEMENT|"  /opt/mgx-metrics/prometheus/prometheus.yml
     done
 
+    # set grafana secrets
+    source ../secrets.env
+    sed -i "s/^admin_user = .*/admin_user = ${GRAFANA_USER}/" \
+        /opt/mgx-metrics/grafana/conf/defaults.ini
+
+    sed -i "s/^admin_password = .*/admin_password = ${GRAFANA_PASSWD}/" \
+        /opt/mgx-metrics/grafana/conf/defaults.ini
+
     systemctl enable node_exporter
     systemctl enable prometheus
     systemctl restart node_exporter
