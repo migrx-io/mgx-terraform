@@ -1,6 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
+source ../secrets.env
+
 export DEBIAN_FRONTEND=noninteractive
 MGX_VAR_DIR=/var/lib/migrx
 PY=/opt/mgx-pyenv3/bin/python
@@ -84,7 +86,6 @@ if [ "$IS_METRICS" = "True" ]; then
     done
 
     # set grafana secrets
-    source ../secrets.env
     sed -i "s/^admin_user = .*/admin_user = ${GRAFANA_USER}/" \
         /opt/mgx-metrics/grafana/conf/defaults.ini
 
