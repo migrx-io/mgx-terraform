@@ -29,8 +29,6 @@ mgmt_pool = {
 #
 # How to calculate ther rw/r cache size
 # Avaliable (Disk size in GiB * 1024) * 0.93 (7% for metadata)
-# Cluster size = 4 MiB
-# Total clusters = Avaliable / 4 (cluster size)
 # RW cache = Avaliable * 0.05 
 # R cache = (Avaliable) - RW cache * Number of nodes
 # 
@@ -44,8 +42,8 @@ storage_pools = {
     nodes_count           = 3
     nvme_node_disks_count = 1
     max_volumes_count     = 10
-    r_cache_size_in_mib   = 1200000
-    rw_cache_size_in_mib  = 50000
+    r_cache_size_in_mib   = 1500000
+    rw_cache_size_in_mib  = 85000
     raid_level            = 1
     s3_bucket_names       = ["mgxs3storage1"]
     s3_force_destroy      = true
