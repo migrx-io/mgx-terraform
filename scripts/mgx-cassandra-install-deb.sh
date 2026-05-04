@@ -7,7 +7,7 @@ echo "STEP 1. Install packages.."
 echo ""
 
 curl -o /etc/apt/keyrings/apache-cassandra.asc https://downloads.apache.org/cassandra/KEYS
-echo "deb [signed-by=/etc/apt/keyrings/apache-cassandra.asc] https://debian.cassandra.apache.org 41x main" | tee -a /etc/apt/sources.list.d/cassandra.sources.list
+echo "deb [signed-by=/etc/apt/keyrings/apache-cassandra.asc] https://debian.cassandra.apache.org 41x main" | tee /etc/apt/sources.list.d/cassandra.sources.list
 apt-get update
 apt install -y cassandra 
 
