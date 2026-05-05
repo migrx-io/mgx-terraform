@@ -18,6 +18,13 @@ echo ""
 echo "deb [trusted=yes] https://repo.migrx.io/DEBS/ migrx main" | tee /etc/apt/sources.list.d/migrx.list
 apt-get update
 
+
+cat <<EOF > /etc/apt/preferences.d/migrx
+Package: *
+Pin: origin repo.migrx.io
+Pin-Priority: 1001
+EOF
+
 echo "STEP 2. Install packages.."
 echo ""
 
