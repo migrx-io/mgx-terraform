@@ -47,6 +47,9 @@ sed -i "s/127.0.0.1:7000/${CASS_RPC_ADDR}:7000/g" /etc/cassandra/cassandra.yaml
 sed -i "s/127.0.0.1:7000/${CASS_RPC_ADDR}:7000/g" /etc/cassandra/cassandra.yaml
 sed -i "s/^\(\s*-\s*seeds:\s*\).*/\1\"${CASS_RPC_SEEDS}\"/" /etc/cassandra/cassandra.yaml
 
+# Random sleep to help with seed propagation
+sleep $((3 + RANDOM % 8))
+
 systemctl enable cassandra
 systemctl restart cassandra
 
