@@ -23,6 +23,7 @@ MGX_S3BACKER_ARGS="\
     --nbd-param=cache-high-threshold=95 \
     --nbd-param=cache-low-threshold=80 \
     --nbd-param=cache-on-read=true \
+    --nbd-param=cache-fill-threshold=50 \
     --region=<region> \
     --accessEC2IAM=storage-<pool>-full-access-role \
     --force \
