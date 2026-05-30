@@ -28,7 +28,7 @@ EOF
 echo "STEP 2. Install packages.."
 echo ""
 
-apt install -y sqlite cron arping
+apt install -y sqlite3 cron arping
 apt install -y libev-dev
 
 apt install -t migrx -y erlang 

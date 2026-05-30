@@ -68,6 +68,33 @@ locals {
     ]...)
   }
 
+  storage_node_ebs_volumes = merge([
+    for pool_name, pool in var.storage_pools : merge([
+      for node_idx in range(pool.nodes_count) : {
+        for vol_idx, vol_spec in flatten([
+          for spec in pool.ebs_volumes : [
+            for n in range(spec.count) : {
+              size       = spec.size
+              type       = spec.type
+              iops       = spec.iops
+              throughput = spec.throughput
+            }
+          ]
+        ]) :
+        "${pool_name}-${node_idx}-${vol_idx}" => {
+          pool_name    = pool_name
+          node_idx     = node_idx
+          node_key     = "${pool_name}-${node_idx}"
+          az_index     = node_idx % length(var.azs)
+          device_index = vol_idx
+          size         = vol_spec.size
+          type         = vol_spec.type
+          iops         = vol_spec.iops
+          throughput   = vol_spec.throughput
+        }
+      }
+    ]...)
+  ]...)
 }
 
 resource "null_resource" "validate_nodes_count" {
@@ -420,6 +447,30 @@ resource "aws_instance" "storage_node" {
   }
 }
 
+
+resource "aws_ebs_volume" "storage_node" {
+  for_each = local.storage_node_ebs_volumes
+
+  availability_zone = var.azs[each.value.az_index]
+  size              = each.value.size
+  type              = each.value.type
+  iops              = each.value.iops
+  throughput        = each.value.throughput
+
+  tags = {
+    Name    = "storage-${each.value.pool_name}-${each.value.node_idx}-vol-${each.value.device_index}"
+    Pool    = each.value.pool_name
+    Service = "mgx-storage"
+  }
+}
+
+resource "aws_volume_attachment" "storage_node" {
+  for_each = local.storage_node_ebs_volumes
+
+  device_name = "/dev/sd${substr("fghijklmnopqrstuvwxyz", each.value.device_index, 1)}"
+  volume_id   = aws_ebs_volume.storage_node[each.key].id
+  instance_id = aws_instance.storage_node[each.value.node_key].id
+}
 
 resource "aws_s3_bucket" "s3storage" {
   for_each = {

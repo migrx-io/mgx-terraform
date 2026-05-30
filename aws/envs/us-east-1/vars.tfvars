@@ -37,33 +37,26 @@ storage_pools = {
   pool1 = {
     description           = "Test pool1"
     labels                = "name=pool-1,env=dev"
-    nodes_ami             = "ami-0f9de6e2d2f067fca"
-    nodes_instance_type   = "i4i.2xlarge"
+    nodes_ami             = "ami-0953e2223326856ce"
+    nodes_instance_type   = "m8gb.xlarge"
     nodes_count           = 3
-    nvme_node_disks_count = 1
+    nvme_node_disks_count = 0
     max_volumes_count     = 10
-    r_cache_size_in_mib   = 1500000
-    rw_cache_size_in_mib  = 85000
+    r_cache_size_in_mib   = 0
+    rw_cache_size_in_mib  = 0
     raid_level            = 1
     s3_bucket_names       = ["mgxs3storage1"]
     s3_force_destroy      = true
     enable_metrics        = true
     enable_grafana        = true
-  }
-  pool2 = {
-    description           = "Test pool2"
-    labels                = "name=pool-2,env=dev"
-    nodes_ami             = "ami-0f9de6e2d2f067fca"
-    nodes_instance_type   = "c5ad.4xlarge"
-    nodes_count           = 0
-    nvme_node_disks_count = 0
-    max_volumes_count     = 0
-    r_cache_size_in_mib   = 0
-    rw_cache_size_in_mib  = 0
-    raid_level            = 1
-    s3_bucket_names       = []
-    s3_force_destroy      = true
-    enable_metrics        = false
-    enable_grafana        = false
+    ebs_volumes = [
+      {
+        size       = 100
+        type       = "gp3"
+        iops       = 3000
+        throughput = 125
+        count      = 10
+      }
+    ]
   }
 }

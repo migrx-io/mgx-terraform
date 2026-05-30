@@ -61,14 +61,14 @@ systemctl enable mgx-gateway-api
 systemctl enable cron
 
 systemctl enable mgx-spdk
-systemctl enable mgx-spdk-cache
+systemctl disable mgx-spdk-cache
 
 systemctl restart mgx-core
 systemctl restart mgx-gateway-api
 systemctl restart cron
 
 systemctl restart mgx-spdk
-systemctl restart mgx-spdk-cache
+systemctl stop mgx-spdk-cache
 
 # 10. Install plugins 
 bash -e ./mgx-plugins-deb.sh

@@ -63,6 +63,7 @@ resource "null_resource" "provision_storage" {
     aws_instance.bastion,
     aws_instance.storage_node,
     aws_nat_gateway.nat_gw,
+    aws_volume_attachment.storage_node,
   ]
 
   connection {

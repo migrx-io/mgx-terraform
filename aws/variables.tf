@@ -84,6 +84,13 @@ variable "storage_pools" {
     s3_force_destroy      = bool         # Whether to force destroy the S3 bucket (delete even if it contains objects)
     enable_metrics        = bool
     enable_grafana        = bool
+    ebs_volumes = optional(list(object({
+      size       = number                # Volume size in GiB
+      type       = string                # gp3, io1, io2, gp2, st1, sc1, standard
+      iops       = optional(number)      # Required for io1/io2, optional for gp3
+      throughput = optional(number)      # MiB/s, only valid for gp3
+      count      = number                # Number of volumes of this spec per node
+    })), [])
   }))
 
 }
