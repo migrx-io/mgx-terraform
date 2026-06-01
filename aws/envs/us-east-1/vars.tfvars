@@ -40,16 +40,12 @@ storage_pools = {
     nodes_ami             = "ami-0953e2223326856ce"
     nodes_instance_type   = "m8gb.xlarge"
     nodes_count           = 3
-    nvme_node_disks_count = 0
     max_volumes_count     = 10
-    r_cache_size_in_mib   = 0
-    rw_cache_size_in_mib  = 0
-    raid_level            = 1
     s3_bucket_names       = ["mgxs3storage1"]
     s3_force_destroy      = true
     enable_metrics        = true
     enable_grafana        = true
-    ebs_volumes = [
+    ebs_cache = [
       {
         size       = 100
         type       = "gp3"
@@ -58,5 +54,11 @@ storage_pools = {
         count      = 10
       }
     ]
+    # nvme_cache = {
+    #   nvme_node_disks_count = 0
+    #   r_cache_size_in_mib   = 0
+    #   rw_cache_size_in_mib  = 0
+    #   raid_level            = 1
+    # }
   }
 }

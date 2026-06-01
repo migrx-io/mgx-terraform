@@ -72,7 +72,7 @@ locals {
     for pool_name, pool in var.storage_pools : merge([
       for node_idx in range(pool.nodes_count) : {
         for vol_idx, vol_spec in flatten([
-          for spec in pool.ebs_volumes : [
+          for spec in pool.ebs_cache : [
             for n in range(spec.count) : {
               size       = spec.size
               type       = spec.type

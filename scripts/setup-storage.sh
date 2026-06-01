@@ -56,19 +56,32 @@ chown mgx-core:mgx-core /etc/mgx-spdk
 chown mgx-core:mgx-core /etc/mgx-spdk-cache
 chown mgx-core:mgx-core -R /etc/cassandra/
 
+# Select SPDK services depending on the pool cache setup:
+#   ebs  -> mgx-spdk only          (mgx-spdk-cache stopped and disabled)
+#   nvme -> mgx-spdk + mgx-spdk-cache (both running)
+CACHE_TYPE=$($PY ./setup-helper.py cache-type)
+
 systemctl enable mgx-core
 systemctl enable mgx-gateway-api
 systemctl enable cron
 
 systemctl enable mgx-spdk
-systemctl disable mgx-spdk-cache
+if [ "$CACHE_TYPE" = "nvme" ]; then
+    systemctl enable mgx-spdk-cache
+else
+    systemctl disable mgx-spdk-cache
+fi
 
 systemctl restart mgx-core
 systemctl restart mgx-gateway-api
 systemctl restart cron
 
 systemctl restart mgx-spdk
-systemctl stop mgx-spdk-cache
+if [ "$CACHE_TYPE" = "nvme" ]; then
+    systemctl restart mgx-spdk-cache
+else
+    systemctl stop mgx-spdk-cache
+fi
 
 # 10. Install plugins 
 bash -e ./mgx-plugins-deb.sh

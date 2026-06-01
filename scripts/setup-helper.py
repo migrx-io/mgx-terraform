@@ -165,6 +165,20 @@ def mgx_spdk():
 
     print(data)
 
+def cache_type():
+
+    # Load pool info JSON
+    d = {}
+    with open(POOL_INFO_FILE, "r") as f:
+        d = json.load(f)
+
+    # nvme_cache takes precedence; otherwise fall back to ebs
+    if d.get("config", {}).get("nvme_cache"):
+        print("nvme")
+    else:
+        print("ebs")
+
+
 def is_metrics_enabled():
 
     # Load pool info JSON
@@ -421,6 +435,8 @@ if __name__ == "__main__":
             mgx_cluster_wait()
         elif op == "is-metrics-enabled":
             is_metrics_enabled()
+        elif op == "cache-type":
+            cache_type()
 
     except Exception as e:
         print(f"ERROR: {e}", file=sys.stderr)

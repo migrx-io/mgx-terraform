@@ -75,22 +75,26 @@ variable "storage_pools" {
     nodes_ami             = string # Storage nodes AMI
     nodes_instance_type   = string # Storage nodes type
     nodes_count           = number # Storage nodes count
-    nvme_node_disks_count = number
     max_volumes_count     = number
-    r_cache_size_in_mib   = number
-    rw_cache_size_in_mib  = number
-    raid_level            = number
     s3_bucket_names       = list(string) # S3 bucket names to store block data
     s3_force_destroy      = bool         # Whether to force destroy the S3 bucket (delete even if it contains objects)
     enable_metrics        = bool
     enable_grafana        = bool
-    ebs_volumes = optional(list(object({
+    # EBS-backed cache setup
+    ebs_cache = optional(list(object({
       size       = number                # Volume size in GiB
       type       = string                # gp3, io1, io2, gp2, st1, sc1, standard
       iops       = optional(number)      # Required for io1/io2, optional for gp3
       throughput = optional(number)      # MiB/s, only valid for gp3
       count      = number                # Number of volumes of this spec per node
     })), [])
+    # Local NVMe-backed cache setup
+    nvme_cache = optional(object({
+      nvme_node_disks_count = number # Number of local NVMe disks per node
+      r_cache_size_in_mib   = number
+      rw_cache_size_in_mib  = number
+      raid_level            = number
+    }))
   }))
 
 }
