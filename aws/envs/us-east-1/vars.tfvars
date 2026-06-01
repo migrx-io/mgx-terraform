@@ -15,14 +15,14 @@ storage_subnet_cidrs = [
 bastion = {
   enable        = true
   vpc_subnet    = "subnet-06b5191fc3bf0caff"
-  ami           = "ami-0f9de6e2d2f067fca"
-  instance_type = "t2.micro"
+  ami           = "ami-0953e2223326856ce"
+  instance_type = "t4g.micro"
   whitelist_ips = ["0.0.0.0/0"]
 }
 
 mgmt_pool = {
-  nodes_ami           = "ami-0f9de6e2d2f067fca"
-  nodes_instance_type = "t3a.xlarge"
+  nodes_ami           = "ami-0953e2223326856ce"
+  nodes_instance_type = "t4g.xlarge"
   nodes_count         = 0
 }
 
