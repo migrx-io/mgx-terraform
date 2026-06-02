@@ -172,11 +172,12 @@ def cache_type():
     with open(POOL_INFO_FILE, "r") as f:
         d = json.load(f)
 
-    # nvme_cache takes precedence; otherwise fall back to ebs
-    if d.get("config", {}).get("nvme_cache"):
-        print("nvme")
-    else:
+    # raid_level == 0 means the pool uses EBS volumes striped into a single
+    # mdadm RAID0 cache (no SPDK cache service); any other level is local NVMe.
+    if d.get("config", {}).get("raid_level") == 0:
         print("ebs")
+    else:
+        print("nvme")
 
 
 def is_metrics_enabled():

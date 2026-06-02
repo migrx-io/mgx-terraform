@@ -72,7 +72,7 @@ locals {
     for pool_name, pool in var.storage_pools : merge([
       for node_idx in range(pool.nodes_count) : {
         for vol_idx, vol_spec in flatten([
-          for spec in pool.ebs_cache : [
+          for spec in pool.ebs_volumes : [
             for n in range(spec.count) : {
               size       = spec.size
               type       = spec.type
@@ -109,6 +109,14 @@ resource "null_resource" "validate_nodes_count" {
     precondition {
       condition     = var.mgmt_pool.nodes_count <= local.reserved_ip_count * length(var.azs)
       error_message = "Management pool nodes_count (${var.mgmt_pool.nodes_count}) exceeds reserved_ip_count (${local.reserved_ip_count * length(var.azs)}). Please create a new pool if you need more resources."
+    }
+    precondition {
+      condition = alltrue([
+        for pool in var.storage_pools :
+        length(var.azs) == 1
+        if pool.raid_level == 0
+      ])
+      error_message = "Storage pools with raid_level = 0 (EBS RAID0 cache) require a single AZ (azs must have length 1), because EBS volumes and their drain/migration are AZ-bound."
     }
   }
 }

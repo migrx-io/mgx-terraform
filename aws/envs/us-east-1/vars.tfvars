@@ -40,12 +40,17 @@ storage_pools = {
     nodes_ami             = "ami-029f1e8b2d0665554"
     nodes_instance_type   = "m8gb.xlarge"
     nodes_count           = 3
+    nvme_node_disks_count = 10 # = sum of ebs_volumes count when raid_level = 0
     max_volumes_count     = 10
+    r_cache_size_in_mib   = 90000 # read cache
+    rw_cache_size_in_mib  = 10000  # write cache
+    raid_level            = 0     # 0 = EBS RAID0 cache built from ebs_volumes
     s3_bucket_names       = ["mgxs3storage1"]
     s3_force_destroy      = true
     enable_metrics        = true
     enable_grafana        = true
-    ebs_cache = [
+    # EBS volumes attached per node and striped into one RAID0 cache.
+    ebs_volumes = [
       {
         size       = 100
         type       = "gp3"
@@ -54,11 +59,5 @@ storage_pools = {
         count      = 10
       }
     ]
-    # nvme_cache = {
-    #   nvme_node_disks_count = 0
-    #   r_cache_size_in_mib   = 0
-    #   rw_cache_size_in_mib  = 0
-    #   raid_level            = 1
-    # }
   }
 }
