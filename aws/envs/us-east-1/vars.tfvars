@@ -15,13 +15,13 @@ storage_subnet_cidrs = [
 bastion = {
   enable        = true
   vpc_subnet    = "subnet-06b5191fc3bf0caff"
-  ami           = "ami-0953e2223326856ce"
+  ami           = "ami-01c7b09d9a8bb417b"
   instance_type = "t4g.micro"
   whitelist_ips = ["0.0.0.0/0"]
 }
 
 mgmt_pool = {
-  nodes_ami           = "ami-0953e2223326856ce"
+  nodes_ami           = "ami-01c7b09d9a8bb417b"
   nodes_instance_type = "t4g.xlarge"
   nodes_count         = 0
 }
@@ -37,7 +37,7 @@ storage_pools = {
   pool1 = {
     description           = "Test pool1"
     labels                = "name=pool-1,env=dev"
-    nodes_ami             = "ami-0953e2223326856ce"
+    nodes_ami             = "ami-01c7b09d9a8bb417b"
     nodes_instance_type   = "m8gb.xlarge"
     nodes_count           = 3
     max_volumes_count     = 10
