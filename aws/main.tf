@@ -503,6 +503,10 @@ resource "aws_ebs_volume" "storage_node" {
     Name    = "storage-${each.value.pool_name}-${each.value.node_idx}-vol-${each.value.device_index}"
     Pool    = each.value.pool_name
     Service = "mgx-storage"
+    # Owner node uuid = uuid5(DNS, data-ip), matching the cache plugin's node
+    # id (uuid.uuid5(NAMESPACE_DNS, storage_data_ip)). Used to group EBS
+    # volumes by their owning node when they migrate during a drain.
+    Owner = uuidv5("dns", tolist(aws_network_interface.storage_secondary[each.value.node_key].private_ips)[0])
   }
 }
 
