@@ -47,8 +47,24 @@ sed -i "s/127.0.0.1:7000/${CASS_RPC_ADDR}:7000/g" /etc/cassandra/cassandra.yaml
 sed -i "s/127.0.0.1:7000/${CASS_RPC_ADDR}:7000/g" /etc/cassandra/cassandra.yaml
 sed -i "s/^\(\s*-\s*seeds:\s*\).*/\1\"${CASS_RPC_SEEDS}\"/" /etc/cassandra/cassandra.yaml
 
-# Random sleep to help with seed propagation
-sleep $((3 + RANDOM % 8))
+FIRST_SEED=$(echo "${CASS_RPC_SEEDS}" | cut -d',' -f1)
+FIRST_SEED_IP="${FIRST_SEED%%:*}"
+TARGET=${CASS_NODES_COUNT}
+
+# The default 'cassandra' superuser is auto-created the first time a node starts
+# with PasswordAuthenticator. If several nodes do that at once (system_auth is
+# SimpleStrategy RF=1 at bootstrap) the inserts race and can leave a row with a
+# null can_login/is_superuser -> "Invalid metadata for role cassandra" NPE at
+# the very first login. Start the first seed alone; every other node waits until
+# the first seed has finished its auth bootstrap before it boots and joins.
+if [ "${CASS_RPC_ADDR}" != "${FIRST_SEED_IP}" ]; then
+    echo "Not first seed — waiting for first seed ${FIRST_SEED_IP} to finish auth bootstrap..."
+    until cqlsh -u cassandra -p cassandra ${FIRST_SEED_IP} -e "SHOW HOST" >/dev/null 2>&1 \
+       || cqlsh -u "${CASS_USER}" -p "${CASS_PASSWD}" ${FIRST_SEED_IP} -e "SHOW HOST" >/dev/null 2>&1; do
+        echo "First seed auth not ready yet, waiting..."
+        sleep 5
+    done
+fi
 
 systemctl enable cassandra
 systemctl restart cassandra
@@ -58,10 +74,6 @@ echo "Waiting for Cassandra to be ready on port 9042..."
 until nc -z ${CASS_RPC_ADDR} 9042; do
     sleep 2
 done
-
-FIRST_SEED=$(echo "${CASS_RPC_SEEDS}" | cut -d',' -f1)
-FIRST_SEED_IP="${FIRST_SEED%%:*}"
-TARGET=${CASS_NODES_COUNT}
 
 # wait all nodes is up before run
 while true; do
@@ -89,6 +101,13 @@ if [ "${CASS_RPC_ADDR}" = "${FIRST_SEED_IP}" ]; then
 	    done
 
 	    cqlsh -u cassandra -p cassandra ${CASS_RPC_ADDR} -e  "ALTER KEYSPACE \"system_auth\" WITH REPLICATION = {'class' : 'NetworkTopologyStrategy', 'dc1' : 3};"
+
+	    # The default 'cassandra' superuser is read at QUORUM. After raising
+	    # system_auth to RF=3 its row still physically lives on a single node,
+	    # so a later QUORUM read merges in nulls -> the same NPE on the running
+	    # cluster. Repair streams the auth data to all replicas first.
+	    echo "Repairing system_auth so role data exists on all replicas..."
+	    nodetool repair system_auth
 
 	    cqlsh -u cassandra -p cassandra ${CASS_RPC_ADDR} -e "CREATE ROLE ${CASS_USER} WITH PASSWORD = '${CASS_PASSWD}' AND SUPERUSER = true AND LOGIN = true;"
 		
