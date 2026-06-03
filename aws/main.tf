@@ -316,6 +316,40 @@ resource "aws_iam_role_policy" "s3_bucket_only" {
   })
 }
 
+# EBS cache migration (raid_level = 0 pools): allow nodes to physically move
+# their pool's cache volumes between instances during a drain. Tag-scoped to
+# the pool so a node can only touch its own pool's volumes.
+resource "aws_iam_role_policy" "ebs_cache_migrate" {
+
+  for_each = {
+    for k, v in var.storage_pools : k => v if v.raid_level == 0
+  }
+
+  name = "ebs-cache-${each.key}-migrate-policy"
+  role = aws_iam_role.storage_s3_full_access[each.key].id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["ec2:DescribeVolumes", "ec2:DescribeInstances"]
+        Resource = "*"
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["ec2:AttachVolume", "ec2:DetachVolume"]
+        Resource = "*"
+        Condition = {
+          StringEquals = {
+            "ec2:ResourceTag/Pool" = each.key
+          }
+        }
+      }
+    ]
+  })
+}
+
 resource "aws_iam_instance_profile" "ec2_profile" {
   for_each = var.storage_pools
 
@@ -402,8 +436,8 @@ resource "aws_instance" "mgmt_node" {
   }
 
   root_block_device {
-    volume_size = 30
-    volume_type = "gp3"
+    volume_size           = 30
+    volume_type           = "gp3"
     delete_on_termination = true
   }
 
@@ -444,8 +478,8 @@ resource "aws_instance" "storage_node" {
   }
 
   root_block_device {
-    volume_size = 30
-    volume_type = "gp3"
+    volume_size           = 30
+    volume_type           = "gp3"
     delete_on_termination = true
   }
 
