@@ -112,7 +112,12 @@ resource "null_resource" "provision_storage" {
   ${jsonencode({
       region    = var.region,
       pool_name = split("-", each.key)[0],
-      config    = var.storage_pools[split("-", each.key)[0]]
+      config = merge(
+        var.storage_pools[split("-", each.key)[0]],
+        {
+          cache_volumes = lookup(local.cache_volumes_by_pool, split("-", each.key)[0], {})
+        }
+      )
 })}
 
   EOC

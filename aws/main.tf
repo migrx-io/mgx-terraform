@@ -95,6 +95,22 @@ locals {
       }
     ]...)
   ]...)
+
+  # EBS pools (raid_level == 0): owner node uuid -> [volume ids], rendered into
+  # the cache config (cache_volumes) so the cache plugin groups attached EBS
+  # devices by owner and the scheduler picks a drained node's volumes to move,
+  # both without scanning EC2 tags. Owner uuid = uuid5(DNS, data-ip), matching
+  # the cache plugin node id (uuid.uuid5(NAMESPACE_DNS, storage_data_ip)).
+  cache_volumes_by_pool = {
+    for pool_name, pool in var.storage_pools : pool_name => {
+      for node_idx in range(pool.nodes_count) :
+      uuidv5("dns", tolist(aws_network_interface.storage_secondary["${pool_name}-${node_idx}"].private_ips)[0]) => [
+        for k, v in local.storage_node_ebs_volumes :
+        aws_ebs_volume.storage_node[k].id
+        if v.node_key == "${pool_name}-${node_idx}"
+      ]
+    } if pool.raid_level == 0
+  }
 }
 
 resource "null_resource" "validate_nodes_count" {
@@ -332,11 +348,21 @@ resource "aws_iam_role_policy" "ebs_cache_migrate" {
     Version = "2012-10-17"
     Statement = [
       {
+        # Describe* actions don't support resource-level or tag conditions
+        # (AWS limitation), so Resource must be "*". Narrow to the pool's
+        # region, the only scoping AWS allows here.
         Effect   = "Allow"
         Action   = ["ec2:DescribeVolumes", "ec2:DescribeInstances"]
         Resource = "*"
+        Condition = {
+          StringEquals = {
+            "aws:RequestedRegion" = var.region
+          }
+        }
       },
       {
+        # AttachVolume/DetachVolume authorize against BOTH the volume and the
+        # instance, so both must carry Pool=<pool> (see storage_node tags).
         Effect   = "Allow"
         Action   = ["ec2:AttachVolume", "ec2:DetachVolume"]
         Resource = "*"
@@ -486,6 +512,9 @@ resource "aws_instance" "storage_node" {
   tags = {
     Name    = "storage-node-${each.value.pool_name}-${each.value.index}"
     Service = "mgx-storage"
+    # Pool tag required so ec2:AttachVolume/DetachVolume tag-scoping authorizes
+    # the instance resource (the volume carries the same Pool tag).
+    Pool = each.value.pool_name
   }
 }
 
@@ -503,10 +532,6 @@ resource "aws_ebs_volume" "storage_node" {
     Name    = "storage-${each.value.pool_name}-${each.value.node_idx}-vol-${each.value.device_index}"
     Pool    = each.value.pool_name
     Service = "mgx-storage"
-    # Owner node uuid = uuid5(DNS, data-ip), matching the cache plugin's node
-    # id (uuid.uuid5(NAMESPACE_DNS, storage_data_ip)). Used to group EBS
-    # volumes by their owning node when they migrate during a drain.
-    Owner = uuidv5("dns", tolist(aws_network_interface.storage_secondary[each.value.node_key].private_ips)[0])
   }
 }
 

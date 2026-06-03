@@ -216,6 +216,10 @@ def generate_cache_yaml():
     values = d["config"]
     values["name"] = d["pool_name"]
 
+    # EBS pools carry an owner->[volume-ids] map (terraform); render it as a
+    # JSON string so the cache config stores it verbatim.
+    values["cache_volumes"] = json.dumps(values.get("cache_volumes") or {})
+
     # Read storage data IPs
     with open(DATA_IPS_FILE, "r") as f:
         ips = [line.strip() for line in f if line.strip()]

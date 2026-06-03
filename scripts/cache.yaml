@@ -29,6 +29,7 @@ spec:
   raid_fast_io_fail_timeout_sec: 0
   raid_level: {raid_level}
   mount_mkfs_string: "mkfs.xfs -f -b size=4096"
+  cache_volumes: '{cache_volumes}'
 
 ---
 apiVersion: v1
