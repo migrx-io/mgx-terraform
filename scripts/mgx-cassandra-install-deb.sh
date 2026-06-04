@@ -18,14 +18,16 @@ systemctl stop cassandra
 
 # clear data if exists
 rm -rf /var/lib/cassandra/commitlog/*
+rm -rf /var/lib/cassandra/hints/*
+rm -rf /var/lib/cassandra/saved_caches/*
 
 CURRENT_CLUSTER=$(grep -E '^cluster_name:' /etc/cassandra/cassandra.yaml | awk -F': ' '{print $2}' | tr -d '"')
 if [ "$CURRENT_CLUSTER" != "Migrx" ]; then
     rm -rf /var/lib/cassandra/data/*
+    FRESH_BOOTSTRAP=1
+else
+    FRESH_BOOTSTRAP=0
 fi
-
-rm -rf /var/lib/cassandra/hints/*
-rm -rf /var/lib/cassandra/saved_caches/*
 
 echo "STEP 3. Configurate.."
 echo ""
@@ -57,7 +59,15 @@ TARGET=${CASS_NODES_COUNT}
 # null can_login/is_superuser -> "Invalid metadata for role cassandra" NPE at
 # the very first login. Start the first seed alone; every other node waits until
 # the first seed has finished its auth bootstrap before it boots and joins.
-if [ "${CASS_RPC_ADDR}" != "${FIRST_SEED_IP}" ]; then
+#
+# This staggering only applies to a FRESH cluster. On a re-provision the
+# default 'cassandra' login no longer works (its password was changed) and
+# system_auth is NetworkTopologyStrategy RF=3, so authenticating as CASS_USER
+# can't reach quorum while only the first seed is up. Waiting here would
+# deadlock: non-seeds won't start until the seed is "ready", the seed won't
+# see enough nodes until the non-seeds start. So skip the wait on re-provision
+# and let every node start immediately and re-form quorum.
+if [ "${CASS_RPC_ADDR}" != "${FIRST_SEED_IP}" ] && [ "${FRESH_BOOTSTRAP}" = "1" ]; then
     echo "Not first seed — waiting for first seed ${FIRST_SEED_IP} to finish auth bootstrap..."
     until cqlsh -u cassandra -p cassandra ${FIRST_SEED_IP} -e "SHOW HOST" >/dev/null 2>&1 \
        || cqlsh -u "${CASS_USER}" -p "${CASS_PASSWD}" ${FIRST_SEED_IP} -e "SHOW HOST" >/dev/null 2>&1; do
@@ -101,13 +111,6 @@ if [ "${CASS_RPC_ADDR}" = "${FIRST_SEED_IP}" ]; then
 	    done
 
 	    cqlsh -u cassandra -p cassandra ${CASS_RPC_ADDR} -e  "ALTER KEYSPACE \"system_auth\" WITH REPLICATION = {'class' : 'NetworkTopologyStrategy', 'dc1' : 3};"
-
-	    # The default 'cassandra' superuser is read at QUORUM. After raising
-	    # system_auth to RF=3 its row still physically lives on a single node,
-	    # so a later QUORUM read merges in nulls -> the same NPE on the running
-	    # cluster. Repair streams the auth data to all replicas first.
-	    echo "Repairing system_auth so role data exists on all replicas..."
-	    nodetool repair system_auth
 
 	    cqlsh -u cassandra -p cassandra ${CASS_RPC_ADDR} -e "CREATE ROLE ${CASS_USER} WITH PASSWORD = '${CASS_PASSWD}' AND SUPERUSER = true AND LOGIN = true;"
 		
