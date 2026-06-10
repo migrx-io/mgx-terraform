@@ -233,12 +233,21 @@ def generate_cache_yaml():
     # Add to values
     values["node_ips"] = "[" + ", ".join(f'"{entry}"' for entry in node_entries) + "]"
     values["s3_buckets"] = values["s3_bucket_names"]
+    # Snapshot dst_bucket: use the dedicated backup bucket when configured,
+    # otherwise fall back to the storage bucket.
+    backup_buckets = values.get("s3_backup_bucket_names") or []
+    values["s3_backup_bucket"] = (
+        backup_buckets[0] if backup_buckets else values["s3_buckets"][0]
+    )
 
     # Format template
     rendered = template.format(**values)
 
     # generate default config for volumes
-    rendered_s = template_s.format(**{"s3_bucket_name": values["s3_buckets"][0]})
+    rendered_s = template_s.format(**{
+        "s3_bucket_name": values["s3_buckets"][0],
+        "s3_backup_bucket": values["s3_backup_bucket"],
+    })
 
     # Save next to cache.yaml
     with open(GEN_MANIFEST_FILE, "w") as f:

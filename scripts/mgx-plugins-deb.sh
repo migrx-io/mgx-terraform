@@ -12,5 +12,7 @@ apt install -t migrx -y mgx-plgn-notif
 apt install -t migrx -y mgx-plgn-services
 apt install -t migrx -y mgx-plgn-cache
 apt install -t migrx -y mgx-plgn-storage
+apt install -t migrx -y mgx-plgn-snapshot
+apt install -t migrx -y mgx-rclone
 apt install -t migrx -y mgx-plgn-scheduler
 apt install -t migrx -y mgx-metrics

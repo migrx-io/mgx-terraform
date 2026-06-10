@@ -79,11 +79,14 @@ variable "storage_pools" {
     max_volumes_count     = number
     r_cache_size_in_mib   = number
     rw_cache_size_in_mib  = number
-    raid_level            = number # 0 = EBS RAID0 cache (uses ebs_volumes); 1/10 = local NVMe cache
+    raid_level            = number       # 0 = EBS RAID0 cache (uses ebs_volumes); 1/10 = local NVMe cache
     s3_bucket_names       = list(string) # S3 bucket names to store block data
-    s3_force_destroy      = bool         # Whether to force destroy the S3 bucket (delete even if it contains objects)
-    enable_metrics        = bool
-    enable_grafana        = bool
+    # S3 bucket names for snapshot backups (snapshot dst_bucket). Defaults to
+    # empty; when empty the snapshot config falls back to the storage bucket.
+    s3_backup_bucket_names = optional(list(string), [])
+    s3_force_destroy       = bool # Whether to force destroy the S3 bucket (delete even if it contains objects)
+    enable_metrics         = bool
+    enable_grafana         = bool
     # EBS volumes to attach per node, striped into a single RAID0 cache.
     # Only used when raid_level = 0; leave empty for local NVMe pools.
     ebs_volumes = optional(list(object({

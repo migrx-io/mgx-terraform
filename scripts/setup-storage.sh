@@ -83,8 +83,12 @@ else
     systemctl stop mgx-spdk-cache
 fi
 
-# 10. Install plugins 
+# 10. Install plugins
 bash -e ./mgx-plugins-deb.sh
+
+# rclone backs snapshot transfers; enable on all nodes
+systemctl enable mgx-rclone
+systemctl restart mgx-rclone
 
 # Enable metrics
 IS_METRICS=$($PY ./setup-helper.py is-metrics-enabled)

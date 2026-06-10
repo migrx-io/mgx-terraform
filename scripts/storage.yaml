@@ -32,3 +32,19 @@ spec:
   name: default
   node_selector: null
   pool_selector: null
+---
+apiVersion: v1
+kind: api
+metadata:
+  plugin:
+    snapshot:
+      config: add
+spec:
+  name: default
+  src_bucket: {s3_bucket_name}
+  dst_bucket: {s3_backup_bucket}
+  storage_class: GLACIER_IR
+  transfers: 4
+  checkers: 8
+  max_running: 5
+  max_increments: 5

@@ -5,7 +5,7 @@ vpc_id = "vpc-095dc0635c6244fe3"
 azs = ["us-east-1a"]
 
 mgmt_subnet_cidrs = [
-  "172.31.96.0/20",  # us-east-1a primary
+  "172.31.96.0/20", # us-east-1a primary
 ]
 
 storage_subnet_cidrs = [
@@ -35,20 +35,21 @@ mgmt_pool = {
 
 storage_pools = {
   pool1 = {
-    description           = "Test pool1"
-    labels                = "name=pool-1,env=dev"
-    nodes_ami             = "ami-029f1e8b2d0665554"
-    nodes_instance_type   = "m8gb.xlarge"
-    nodes_count           = 3
-    nvme_node_disks_count = 10 # = sum of ebs_volumes count when raid_level = 0
-    max_volumes_count     = 10
-    r_cache_size_in_mib   = 90000 # read cache
-    rw_cache_size_in_mib  = 10000  # write cache
-    raid_level            = 0     # 0 = EBS RAID0 cache built from ebs_volumes
-    s3_bucket_names       = ["mgxs3storage1"]
-    s3_force_destroy      = true
-    enable_metrics        = true
-    enable_grafana        = true
+    description            = "Test pool1"
+    labels                 = "name=pool-1,env=dev"
+    nodes_ami              = "ami-029f1e8b2d0665554"
+    nodes_instance_type    = "m8gb.xlarge"
+    nodes_count            = 3
+    nvme_node_disks_count  = 10 # = sum of ebs_volumes count when raid_level = 0
+    max_volumes_count      = 10
+    r_cache_size_in_mib    = 90000 # read cache
+    rw_cache_size_in_mib   = 10000 # write cache
+    raid_level             = 0     # 0 = EBS RAID0 cache built from ebs_volumes
+    s3_bucket_names        = ["mgxs3storage1"]
+    s3_backup_bucket_names = ["mgxs3backup1"]
+    s3_force_destroy       = true
+    enable_metrics         = true
+    enable_grafana         = true
     # EBS volumes attached per node and striped into one RAID0 cache.
     ebs_volumes = [
       {
