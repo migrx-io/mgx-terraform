@@ -87,8 +87,9 @@ fi
 bash -e ./mgx-plugins-deb.sh
 
 # rclone backs snapshot transfers; enable on all nodes
-systemctl enable mgx-rclone
-systemctl restart mgx-rclone
+# unit is shipped as rclone.service by the mgx-rclone package
+systemctl enable rclone
+systemctl restart rclone
 
 # Enable metrics
 IS_METRICS=$($PY ./setup-helper.py is-metrics-enabled)
