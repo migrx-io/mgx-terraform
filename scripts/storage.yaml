@@ -7,6 +7,7 @@ metadata:
 spec:
   name: default
   storage_bucket: {s3_bucket_name}
+  storage_s3purge: "yes"
   cache_r_cache_size: 4096
   cache_rw_cache_size: 1024
   qos_rw_ios_per_sec: 16000
