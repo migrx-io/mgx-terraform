@@ -22,14 +22,3 @@ output "storage_node_mgmt_private_ips" {
     ]
   }
 }
-
-output "storage_node_data_private_ips" {
-  description = "Data IPs of the storage nodes"
-  value = {
-    for pool_name in keys(var.storage_pools) :
-    pool_name => [
-      for idx in range(var.storage_pools[pool_name].nodes_count) :
-      tolist(aws_network_interface.storage_secondary["${pool_name}-${idx}"].private_ips)[0]
-    ]
-  }
-}
