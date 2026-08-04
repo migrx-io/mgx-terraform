@@ -104,6 +104,25 @@ resource "aws_route_table_association" "storage" {
   route_table_id = aws_route_table.private.id
 }
 
+# --- S3 Gateway VPC endpoint --------------------------------------------------
+
+# Keeps node<->S3 traffic on the AWS private network instead of routing it out
+# through the NAT gateway. 
+# Adding it to the private route table installs a more-specific route for S3's prefix
+# list, which wins over the 0.0.0.0/0 NAT route for S3 destinations.
+data "aws_region" "current" {}
+
+resource "aws_vpc_endpoint" "s3" {
+  vpc_id            = var.vpc_id
+  service_name      = "com.amazonaws.${data.aws_region.current.name}.s3"
+  vpc_endpoint_type = "Gateway"
+  route_table_ids   = [aws_route_table.private.id]
+
+  tags = merge(local.common_tags, {
+    Name = "${var.name_prefix}-s3"
+  })
+}
+
 # --- Security groups ----------------------------------------------------------
 
 # Shared by mgmt + storage ENIs. Intra-VPC traffic is open; egress is open so
