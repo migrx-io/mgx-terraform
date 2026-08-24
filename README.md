@@ -1,6 +1,6 @@
-# mgx-storage Terraform modules
+# Backedblock.io terraform modules
 
-Terraform modules to deploy an [mgx-storage](https://migrx.io) cluster on AWS.
+Terraform modules to deploy an [backedblock.io](https://backedblock.io) cluster on AWS.
 The deployment is composed of three components:
 
 | Component | Module | Purpose |
