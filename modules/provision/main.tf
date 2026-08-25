@@ -1,5 +1,5 @@
 # Configures a single node by running the prebaked setup-node.sh <role> that
-# already lives in the AMI (built by mgx-packer). Nothing is uploaded except the
+# already lives in the AMI. Nothing is uploaded except the
 # per-node dynamic inputs that cannot be baked: secrets.env + the ip lists +
 # pool_info.json, staged under provision_dir. setup-node.sh reads them via
 # MGX_PROVISION_DIR and installs nothing - it only configures the node.

@@ -20,7 +20,7 @@ variable "role" {
 }
 
 variable "node_scripts_dir" {
-  description = "Where the prebaked runtime scripts live inside the AMI (built by mgx-packer). setup-node.sh is run from here. Must match node_scripts_dir in the mgx-packer build."
+  description = "Where the prebaked runtime scripts live inside the AMI. setup-node.sh is run from here. Must match node_scripts_dir in the image build."
   type        = string
   default     = "/opt/mgx/scripts"
 }

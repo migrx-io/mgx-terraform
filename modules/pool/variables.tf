@@ -177,7 +177,7 @@ variable "provision_mode" {
 }
 
 variable "node_scripts_dir" {
-  description = "Where the prebaked runtime scripts live inside nodes_ami (built by mgx-packer). setup-node.sh is run from here. Must match node_scripts_dir in the mgx-packer build."
+  description = "Where the prebaked runtime scripts live inside nodes_ami. setup-node.sh is run from here. Must match node_scripts_dir in the image build."
   type        = string
   default     = "/opt/mgx/scripts"
 }

@@ -35,8 +35,8 @@ module "mgmt" {
   enable_metrics      = true
   enable_grafana      = true
 
-  # provisioning (ssh / bastion mode). nodes_ami must be a prebaked mgx AMI
-  # (built by mgx-packer): provisioning runs the baked setup-node.sh in place.
+  # provisioning (ssh / bastion mode). nodes_ami must be a prebaked node AMI
+  # (https://backedblock.io/docs/node-amis): provisioning runs the baked setup-node.sh in place.
   # secrets_file_path defaults to ./secrets.env (this dir). Create it first:
   #   cp ../../secrets.env.example secrets.env
 }

@@ -1,6 +1,7 @@
 # Backedblock.io terraform modules
 
-Terraform modules to deploy an [backedblock.io](https://backedblock.io) cluster on AWS.
+Terraform modules to deploy a [backedblock.io](https://backedblock.io) storage
+cluster on AWS.
 The deployment is composed of three components:
 
 | Component | Module | Purpose |
@@ -25,12 +26,12 @@ You deploy the foundation once, then one `pool` stack per storage pool, plus the
 `/mgx/<cluster>/pools/`; the management stack reads that path to build its pool
 registry and metrics federation.
 
-Nodes boot from a **prebaked mgx AMI** built by [`mgx-packer`](../mgx-packer):
-every package and the node scripts (`setup-node.sh`, helpers, manifests) are
-baked into the image. Provisioning delivers the per-node dynamic inputs
-(`secrets.env`, ip lists, `pool_info.json`) and runs the baked
-`setup-node.sh <role>` in place to configure the node. Set `nodes_ami` to a
-mgx-packer AMI.
+Nodes boot from a **prebaked AMI**: every package and the node scripts
+(`setup-node.sh`, helpers, manifests) are baked into the image. Provisioning
+delivers the per-node dynamic inputs (`secrets.env`, ip lists,
+`pool_info.json`) and runs the baked `setup-node.sh <role>` in place to
+configure the node. Set `nodes_ami` to the published image for your region —
+see [Node AMIs](https://backedblock.io/docs/node-amis).
 
 ## Requirements
 
@@ -39,7 +40,7 @@ mgx-packer AMI.
 - An existing VPC and a public subnet (for the NAT gateway and bastion)
 - A remote state backend (e.g. S3) shared by all stacks, so the `pool` and
   `mgmt` stacks can read the `network` stack's outputs
-- A prebaked mgx AMI (built by [`mgx-packer`](../mgx-packer)) for `nodes_ami`
+- A prebaked node AMI for `nodes_ami` — see [Node AMIs](https://backedblock.io/docs/node-amis)
 - For `ssh` provisioning: an SSH key pair and a `secrets.env` file
   (see [`secrets.env.example`](secrets.env.example))
 
@@ -148,7 +149,7 @@ sizes; how they map to capacity depends on `raid_level`:
 
 ## Provisioning modes
 
-The node scripts are baked into `nodes_ami` (see [`mgx-packer`](../mgx-packer)).
+The node scripts are baked into `nodes_ami` (see [Node AMIs](https://backedblock.io/docs/node-amis)).
 In both modes provisioning only delivers the per-node dynamic files
 (`secrets.env`, ip lists, `pool_info.json`) into `provision_dir`
 (default `/tmp/mgx-provision`) and runs the baked
@@ -163,8 +164,8 @@ In both modes provisioning only delivers the per-node dynamic files
   the baked `setup-node.sh`. The modules attach `AmazonSSMManagedInstanceCore` to
   the node role automatically. Required input: `secrets_ssm_path`.
 
-`node_scripts_dir` must match the path the `mgx-packer` build installed the
-scripts to (both default to `/opt/mgx/scripts`).
+`node_scripts_dir` must match the path the AMI installs the scripts to (both
+default to `/opt/mgx/scripts`).
 
 ## Operations
 

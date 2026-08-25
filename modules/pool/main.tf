@@ -10,7 +10,7 @@ locals {
   pinned_az_index = var.az != null ? lookup(local.az_indices, var.az, null) : null
 
   common_tags = merge({
-    Service   = "mgx-storage"
+    Service   = "backedblock"
     ManagedBy = "terraform"
     Pool      = var.pool_name
   }, var.tags)

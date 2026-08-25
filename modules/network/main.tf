@@ -1,6 +1,6 @@
 locals {
   common_tags = merge({
-    Service   = "mgx-storage"
+    Service   = "backedblock"
     ManagedBy = "terraform"
   }, var.tags)
 
@@ -129,7 +129,7 @@ resource "aws_vpc_endpoint" "s3" {
 # nodes can reach the NAT gateway. Exported as internal_sg_id for other modules.
 resource "aws_security_group" "internal" {
   name        = "${var.name_prefix}-internal"
-  description = "Allow all traffic within the VPC for mgx-storage nodes"
+  description = "Allow all traffic within the VPC for backedblock.io nodes"
   vpc_id      = var.vpc_id
 
   ingress {

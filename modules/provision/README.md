@@ -1,7 +1,7 @@
 # modules/provision
 
-Configures a **single** node from the prebaked mgx AMI. The node scripts are
-already baked into the image (see [`mgx-packer`](../../../mgx-packer)); this
+Configures a **single** node from the prebaked node AMI. The node scripts are
+already baked into the image (see [Node AMIs](https://backedblock.io/docs/node-amis)); this
 module only stages the per-node dynamic inputs — `secrets.env` + the dynamic
 `files` (ip lists, `pool_info.json`) — under `provision_dir`
 (default `/tmp/mgx-provision`), then runs the baked
@@ -33,7 +33,7 @@ and the matching inputs.
 |------|------|---------|-------------|
 | `provision_mode` | both | `"ssh"` | `ssh` or `ssm`. |
 | `role` | both | — | `storage` or `mgmt`. |
-| `node_scripts_dir` | both | `"/opt/mgx/scripts"` | Baked scripts dir in the AMI; must match the mgx-packer build. |
+| `node_scripts_dir` | both | `"/opt/mgx/scripts"` | Baked scripts dir in the AMI; must match the image. |
 | `provision_dir` | both | `"/tmp/mgx-provision"` | Writable dir for the dynamic files (read via `MGX_PROVISION_DIR`). |
 | `files` | both | `{}` | filename => content written into `provision_dir`. |
 | `triggers` | ssh | `{}` | Change any value to force re-provisioning. |

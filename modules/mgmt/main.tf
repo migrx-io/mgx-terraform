@@ -3,7 +3,7 @@ locals {
   n_az = length(local.azs)
 
   common_tags = merge({
-    Service   = "mgx-storage"
+    Service   = "backedblock"
     ManagedBy = "terraform"
     Pool      = "mgmt"
   }, var.tags)

@@ -1,7 +1,7 @@
 variable "name_prefix" {
   description = "Prefix applied to resource names and the Name tag, so multiple deployments can coexist in one account."
   type        = string
-  default     = "mgx-storage"
+  default     = "backedblock"
 }
 
 variable "azs" {

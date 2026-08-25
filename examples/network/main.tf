@@ -18,7 +18,7 @@ provider "aws" {
 module "network" {
   source = "../../modules/network"
 
-  name_prefix = "mgx-storage"
+  name_prefix = "backedblock"
 
   vpc_id = "vpc-095dc0635c6244fe3"
   azs    = ["us-east-1a", "us-east-1b", "us-east-1c"]

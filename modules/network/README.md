@@ -1,6 +1,6 @@
 # modules/network
 
-Foundation / networking for an mgx-storage deployment. Apply this **once** per
+Foundation / networking for a backedblock.io deployment. Apply this **once** per
 environment; the mgmt and pool stacks consume its outputs (via
 `terraform_remote_state`) and add no shared infrastructure of their own.
 
@@ -21,7 +21,7 @@ This module is provider-agnostic: it declares `required_providers` but no
 module "network" {
   source = "migrx-io/mgx/aws//modules/network" # or a local/git path
 
-  name_prefix = "mgx-storage"
+  name_prefix = "backedblock"
   azs         = ["us-east-1a", "us-east-1b", "us-east-1c"]
   vpc_id      = "vpc-0123456789abcdef0"
 
@@ -44,7 +44,7 @@ A runnable root is in [`examples/network`](../../examples/network).
 
 | Name | Type | Default | Description |
 |------|------|---------|-------------|
-| `name_prefix` | `string` | `"mgx-storage"` | Prefix for resource names / Name tag. Make unique per deployment in an account. |
+| `name_prefix` | `string` | `"backedblock"` | Prefix for resource names / Name tag. Make unique per deployment in an account. |
 | `azs` | `list(string)` | — | Availability zones; subnets are indexed in this order. |
 | `vpc_id` | `string` | — | Existing VPC to build in. |
 | `mgmt_subnet_cidrs` | `list(string)` | — | One CIDR per AZ for the management subnets. |

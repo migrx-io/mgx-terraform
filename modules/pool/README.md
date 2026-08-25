@@ -51,7 +51,7 @@ module "pool" {
   s3_force_destroy       = true
   enable_metrics         = true
 
-  # nodes_ami must be a prebaked mgx AMI (built by mgx-packer).
+  # nodes_ami must be a prebaked node AMI (https://backedblock.io/docs/node-amis).
   # secrets_file_path defaults to ./secrets.env (the dir terraform runs from)
 }
 ```
